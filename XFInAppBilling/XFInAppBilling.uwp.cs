@@ -1,5 +1,4 @@
-﻿using Microsoft.Services.Store.Engagement; 
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +6,7 @@ using Windows.Services.Store;
 
 namespace Plugin.XFInAppBilling
 {
- 
+
     public class XFInAppBillingImplementation : IXFInAppBilling
     {
         private StoreContext context = null;
@@ -30,14 +29,7 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<List<InAppBillingProduct>> GetProductsAsync(List<string> ProductIds, ItemType itemType = ItemType.InAppPurchase)
         {
-            try
-            {
-                var logger = StoreServicesCustomEventLogger.GetDefault();
-                logger.Log($"GetSubscriptionsInfo - {ProductIds}");
-            }
-            catch (Exception)
-            {
-            }
+            
             var Products = new List<InAppBillingProduct>();
             if (context == null)
             {
@@ -57,9 +49,7 @@ namespace Plugin.XFInAppBilling
             if (queryResult.ExtendedError != null)
             {
                 // The user may be offline or there might be some other server failure.
-                ExceptionComponent.Report(new ArgumentNullException(), "ExtendedError", queryResult.ExtendedError);
-                // System.Diagnostics.Debug.WriteLine($"ExtendedError: {queryResult.ExtendedError.Message}");
-                return null;
+                throw new Exception(queryResult.ExtendedError.Message, queryResult.ExtendedError.InnerException);
             }
 
             if (queryResult?.Products?.Count > 0)
@@ -220,9 +210,7 @@ namespace Plugin.XFInAppBilling
             if (queryResult.ExtendedError != null)
             {
                 // The user may be offline or there might be some other server failure.
-                ExceptionComponent.Report(new ArgumentNullException(), "ExtendedError", queryResult.ExtendedError.Message);
-
-                return null;
+                throw new Exception(queryResult.ExtendedError.Message, queryResult.ExtendedError.InnerException);
             }
             var purchaseHistoryResult = new List<PurchaseResult>();
             if (queryResult?.Products?.Count > 0)
@@ -268,22 +256,11 @@ namespace Plugin.XFInAppBilling
                 // may need additional code to configure the StoreContext object.
                 // For more info, see https://aka.ms/storecontext-for-desktop.
             }
-
-            try
-            {
-                var logger = StoreServicesCustomEventLogger.GetDefault();
-                logger.Log($"Purchase - {subscriptionStoreId}");
-            }
-            catch (Exception)
-            {
-            }
-
+ 
             bool userOwnsSubscription = await CheckIfUserHasActiveSubscriptionAsync(subscriptionStoreId);
             if (userOwnsSubscription)
             {
-                Settings.IsSubscribed = true;
-
-                // Unlock all the subscription add-on features here.
+                   // Unlock all the subscription add-on features here.
                 return new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = subscriptionStoreId };
             }
 
@@ -326,10 +303,8 @@ namespace Plugin.XFInAppBilling
                 await context.GetAssociatedStoreProductsAsync(new string[] { "Durable" });
 
             if (result.ExtendedError != null)
-            {
-                ExceptionComponent.Report(null, "IAPerror", result.ExtendedError);
-
-                return null;
+            {                
+                throw new Exception(result.ExtendedError.Message, result.ExtendedError.InnerException);                
             }
 
             // Look for the product that represents the subscription.

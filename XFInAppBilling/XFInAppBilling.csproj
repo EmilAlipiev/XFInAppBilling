@@ -1,6 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid90;Xamarin.iOS10;Xamarin.TVOS10;uap10.0.16299</TargetFrameworks>
+    <TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid90;Xamarin.iOS10;Xamarin.TVOS10;uap10.0.18362</TargetFrameworks>
     <AssemblyName>XFInAppBilling</AssemblyName>
     <RootNamespace>XFInAppBilling</RootNamespace>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
@@ -60,12 +60,8 @@
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) "> 
     <Compile Include="**\*.uwp.cs" />
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.9" />      
-    <PackageReference Include="Microsoft.Services.Store.Engagement" Version="10.1901.28001" /> 
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.9" />     
     <PackageReference Include="Microsoft.Services.Store.SDK" Version="10.1705.16001" />
-    <SDKReference Include="Microsoft.Services.Store.Engagement, Version=10.0">
-      <Name>Microsoft Engagement Framework</Name>
-    </SDKReference>
     <SDKReference Include="WindowsDesktop, Version=10.0.18362.0">
       <Name>Windows Desktop Extensions for the UWP</Name>
     </SDKReference>
