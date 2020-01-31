@@ -13,7 +13,7 @@ namespace Plugin.XFInAppBilling
     /// Implementation for InAppBilling
     /// </summary>
     [Preserve(AllMembers = true)]
-    public class XFInAppBillingImplementation : BaseInAppBilling
+    public class XFInAppBillingImplementation : IXFInAppBilling, IDisposable
     {
         static bool IsiOS112 => UIDevice.CurrentDevice.CheckSystemVersion(11, 2);
 
@@ -25,30 +25,35 @@ namespace Plugin.XFInAppBilling
         public static Func<SKPaymentQueue, SKPayment, SKProduct, bool> OnShouldAddStorePayment { get; set; } = null;
 
         /// <summary>
+        /// Dispose of class and parent classes
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
         /// Default constructor for In App Billing on iOS
         /// </summary>
         public XFInAppBillingImplementation()
         {
             paymentObserver = new PaymentObserver(OnPurchaseComplete, OnShouldAddStorePayment);
             SKPaymentQueue.DefaultQueue.AddTransactionObserver(paymentObserver);
+            Dispose(false);
         }
-
-        /// <summary>
-        /// Gets or sets if in testing mode. Only for UWP
-        /// </summary>
-        public override bool InTestingMode { get; set; }
 
         /// <summary>
         /// Connect to billing service
         /// </summary>
         /// <returns>If Success</returns>
-        public override Task<bool> ConnectAsync() => Task.FromResult(true);
+        public Task<bool> ConnectAsync() => Task.FromResult(true);
 
         /// <summary>
         /// Disconnect from the billing service
         /// </summary>
         /// <returns>Task to disconnect</returns>
-        public override bool Disconnect() => true;
+        public bool Disconnect() => true;
 
         /// <summary>
         /// Get product information of a specific product
@@ -56,7 +61,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="productIds">Sku or Id of the product(s)</param>
         /// <param name="itemType">Type of product offering</param>
         /// <returns></returns>
-        public async override Task<List<InAppBillingProduct>> GetProductsAsync(List<string> productIds, ItemType itemType)
+        public async Task<List<InAppBillingProduct>> GetProductsAsync(List<string> productIds, ItemType itemType)
         {
             var products = await GetProductAsync(productIds);
 
@@ -89,7 +94,7 @@ namespace Plugin.XFInAppBilling
             return productRequestDelegate.WaitForResponse();
         }
 
-        protected async override Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase, string verifyOnlyProductId)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase = null, string verifyOnlyProductId = null)
         {
             var purchases = await RestoreAsync();
 
@@ -112,7 +117,17 @@ namespace Plugin.XFInAppBilling
             return validPurchases.Any() ? validPurchases : null;
         }
 
-
+        /// <summary>
+		/// Verifies a specific product type and product id. Use e.g. when product is already purchased but verification failed and needs to be called again.
+		/// </summary>
+		/// <param name="itemType">Type of product</param>
+		/// <param name="verifyPurchase">Interface to verify purchase</param>
+		/// <param name="productId">Id of product</param>
+		/// <returns>The current purchases</returns>
+		public async Task<bool> VerifyPreviousPurchaseAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase, string productId)
+        {
+            return (await GetPurchasesAsync(itemType, verifyPurchase, productId))?.Any(p => productId.Equals(p?.Sku)) ?? false;
+        }
 
         Task<SKPaymentTransaction[]> RestoreAsync()
         {
@@ -187,7 +202,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="payload">Developer specific payload</param>
         /// <param name="verifyPurchase">Interface to verify purchase</param>
         /// <returns></returns>
-        public async override Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null)
+        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null)
         {
             var p = await PurchaseAsync(productId);
 
@@ -295,7 +310,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="purchaseToken">Original Purchase Token</param>
         /// <returns>If consumed successful</returns>
         /// <exception cref="InAppBillingPurchaseException">If an error occures during processing</exception>
-        public override Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken) =>
+        public Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken) =>
             null;
 
         /// <summary>
@@ -307,13 +322,13 @@ namespace Plugin.XFInAppBilling
         /// <param name="verifyPurchase">Verify Purchase implementation</param>
         /// <returns>If consumed successful</returns>
         /// <exception cref="InAppBillingPurchaseException">If an error occures during processing</exception>
-        public override Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null) =>
+        public Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null) =>
             null;
 
-        public override Task<bool> FinishTransaction(PurchaseResult purchase) =>
+        public Task<bool> FinishTransaction(PurchaseResult purchase) =>
             FinishTransaction(purchase?.OrderId);
 
-        public override async Task<bool> FinishTransaction(string purchaseId)
+        public async Task<bool> FinishTransaction(string purchaseId)
         {
             if (string.IsNullOrWhiteSpace(purchaseId))
                 throw new ArgumentException("PurchaseId must be valid", nameof(purchaseId));
@@ -344,16 +359,32 @@ namespace Plugin.XFInAppBilling
 
         private bool disposed = false;
 
+        /// <summary>
+        /// Dispose method
+        /// </summary>
+        /// <param name="disposing"></param>
+        public void Disposing(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    //dispose only
+                }
+
+                disposed = true;
+            }
+        }
 
         /// <summary>
         /// Dispose
         /// </summary>
         /// <param name="disposing"></param>
-        public override void Dispose(bool disposing)
+        public void Dispose(bool disposing)
         {
             if (disposed)
             {
-                base.Dispose(disposing);
+                Disposing(disposing);
                 return;
             }
 
@@ -361,7 +392,7 @@ namespace Plugin.XFInAppBilling
 
             if (!disposing)
             {
-                base.Dispose(disposing);
+                Disposing(disposing);
                 return;
             }
 
@@ -373,19 +404,24 @@ namespace Plugin.XFInAppBilling
             }
 
 
-            base.Dispose(disposing);
+            Disposing(disposing);
         }
 
-        public override async Task<bool> CheckIfUserHasActiveSubscriptionAsync(string subscriptionId, ItemType itemType = ItemType.InAppPurchase)
+        public async Task<bool> CheckIfUserHasActiveSubscriptionAsync(string subscriptionId, ItemType itemType = ItemType.InAppPurchase)
         {
-            var purchases =await GetPurchasesAsync(itemType);
-            if(purchases?.Count >0)
+            var purchases = await GetPurchasesAsync(itemType);
+            if (purchases?.Count > 0)
             {
                 var found = purchases.Any(p => p.Sku == subscriptionId && p.PurchaseState == PurchaseState.Purchased);
                 return found;
             }
 
             return false;
+        }
+
+        public Task<List<PurchaseResult>> GetPurchaseHistoryAsync(ItemType itemType = ItemType.InAppPurchase)
+        {
+            throw new NotImplementedException();
         }
     }
 

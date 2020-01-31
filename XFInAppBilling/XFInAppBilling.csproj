@@ -28,7 +28,7 @@
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <DefineConstants>$(DefineConstants);</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
@@ -50,7 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
-    <Compile Include="**\*.shared.cs" /> 
+    <Compile Include="**\*.shared.cs" />    
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 

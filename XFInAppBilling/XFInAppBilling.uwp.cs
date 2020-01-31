@@ -151,7 +151,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType">not used for UWP</param>
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null, string verifyOnlyProductId= null)
         {
             if (context == null)
                 context = StoreContext.GetDefault();
@@ -375,6 +375,46 @@ namespace Plugin.XFInAppBilling
 
         }
 
+        public Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken)
+        {
+            throw new NotImplementedException();
+        }
 
+        public Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///  IOS only, not implemented for Android
+        /// </summary>
+        /// <param name="purchase"></param>
+        /// <returns></returns>
+        public Task<bool> FinishTransaction(PurchaseResult purchase)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///  IOS only, not implemented for Android
+        /// </summary>
+        /// <param name="purchaseId"></param>
+        /// <returns></returns>
+        public Task<bool> FinishTransaction(string purchaseId)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///  IOS only, not implemented for Android
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <param name="verifyPurchase"></param>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        public Task<bool> VerifyPreviousPurchaseAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase, string productId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
