@@ -6,7 +6,6 @@ using Windows.Services.Store;
 
 namespace Plugin.XFInAppBilling
 {
-
     public class XFInAppBillingImplementation : IXFInAppBilling
     {
         private StoreContext context = null;
@@ -29,7 +28,7 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<List<InAppBillingProduct>> GetProductsAsync(List<string> ProductIds, ItemType itemType = ItemType.InAppPurchase)
         {
-            
+
             var Products = new List<InAppBillingProduct>();
             if (context == null)
             {
@@ -105,7 +104,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="payload">not used for UWP</param>
         /// <param name="verifyPurchase">not used for UWP</param>
         /// <returns></returns>
-        public Task<PurchaseResult> PurchaseAsync(string subscriptionStoreId, ItemType itemType = ItemType.InAppPurchase, string payload = null, bool verifyPurchase = false)
+        public Task<PurchaseResult> PurchaseAsync(string subscriptionStoreId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
         {
             return SetupSubscriptionInfoAsync(subscriptionStoreId);
         }
@@ -119,7 +118,7 @@ namespace Plugin.XFInAppBilling
         {
             if (subscriptionStoreId != null)
             {
-                var purchases = await GetPurchases();
+                var purchases = await GetPurchasesAsync();
                 if (purchases?.Count > 0)
                 {
                     foreach (var purchase in purchases)
@@ -152,7 +151,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType">not used for UWP</param>
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchases(ItemType itemType = ItemType.InAppPurchase)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null)
         {
             if (context == null)
                 context = StoreContext.GetDefault();
@@ -176,10 +175,7 @@ namespace Plugin.XFInAppBilling
 
                     PurchaseHistoryResult.Add(purchaseHistory);
                 }
-
             }
-
-
 
             // The customer does not have a license to the subscription.
             return PurchaseHistoryResult;
@@ -190,7 +186,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType">not used for UWP</param>
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchaseHistory(ItemType itemType = ItemType.InAppPurchase)
+        public async Task<List<PurchaseResult>> GetPurchaseHistoryAsync(ItemType itemType = ItemType.InAppPurchase)
         {
 
             if (context == null)
@@ -256,11 +252,11 @@ namespace Plugin.XFInAppBilling
                 // may need additional code to configure the StoreContext object.
                 // For more info, see https://aka.ms/storecontext-for-desktop.
             }
- 
+
             bool userOwnsSubscription = await CheckIfUserHasActiveSubscriptionAsync(subscriptionStoreId);
             if (userOwnsSubscription)
             {
-                   // Unlock all the subscription add-on features here.
+                // Unlock all the subscription add-on features here.
                 return new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = subscriptionStoreId };
             }
 
@@ -294,7 +290,7 @@ namespace Plugin.XFInAppBilling
 
         private async Task<InAppBillingProduct> GetSubscriptionProductAsync(string subscriptionStoreId)
         {
-            List<InAppBillingProduct> Products = new List<InAppBillingProduct>();
+            var Products = new List<InAppBillingProduct>();
             // Load the sellable add-ons for this app and check if the trial is still 
             // available for this customer. If they previously acquired a trial they won't 
             // be able to get a trial again, and the StoreProduct.Skus property will 
@@ -303,8 +299,8 @@ namespace Plugin.XFInAppBilling
                 await context.GetAssociatedStoreProductsAsync(new string[] { "Durable" });
 
             if (result.ExtendedError != null)
-            {                
-                throw new Exception(result.ExtendedError.Message, result.ExtendedError.InnerException);                
+            {
+                throw new Exception(result.ExtendedError.Message, result.ExtendedError.InnerException);
             }
 
             // Look for the product that represents the subscription.
@@ -325,7 +321,7 @@ namespace Plugin.XFInAppBilling
                 }
             }
 
-            
+
             return null;
         }
 

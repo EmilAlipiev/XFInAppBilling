@@ -23,15 +23,16 @@ namespace Plugin.XFInAppBilling
         /// <param name="payload">only used for Google, not used for UWP, Amazon</param>
         /// <param name="verifyPurchase">only used for Google, not used for UWP, Amazon</param>
         /// <returns></returns>
-        Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, bool verifyPurchase = false);
+        Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null);
         /// <summary>
         /// Gets all current purchases with status information
         /// </summary>
         /// <param name="itemType">only used for Google, not used for UWP, Amazon</param>
         /// <returns></returns>
-        Task<List<PurchaseResult>> GetPurchases(ItemType itemType = ItemType.InAppPurchase);
+        Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null);
+       
         /// <summary>
-        /// Checks if user has any active subscription. It mostly calls GetPurchases and filters by given subscriptionId
+        /// Checks if user has any active subscription. It mostly calls GetPurchasesAsync and filters by given subscriptionId
         /// </summary>
         /// <param name="subscriptionId"></param>
         /// <param name="itemType">only used for Google, not used for UWP, Amazon</param>
@@ -42,7 +43,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType"></param>
         /// <returns></returns>
-        Task<List<PurchaseResult>> GetPurchaseHistory(ItemType itemType = ItemType.InAppPurchase);
+        Task<List<PurchaseResult>> GetPurchaseHistoryAsync(ItemType itemType = ItemType.InAppPurchase);
         /// <summary>
         /// Initiate Store or Native Api. Pre-checks IAP availability as well.
         /// </summary>

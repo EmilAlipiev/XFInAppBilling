@@ -11,10 +11,10 @@
     <PackageId>XFInAppBilling</PackageId>
     <PackOnBuild>true</PackOnBuild>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageIconUrl>https://raw.githubusercontent.com/jamesmontemagno/InAppBillingPlugin/master/art/icon_128.png</PackageIconUrl>
-    <PackageLicenseUrl>https://github.com/jamesmontemagno/InAppBillingPlugin/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageIconUrl></PackageIconUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <Owners>EmilAlipiev</Owners>
-    <PackageProjectUrl>https://github.com/jamesmontemagno/InAppBillingPlugin</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/EmilAlipiev/XFInAppBilling</PackageProjectUrl>
     <Summary>Xamarin and Windows plugin to In-App Billing.</Summary>
     <PackageTags>xamarin, xamarin.forms, android, ios, uwp, windows phone, In-App Billing, purchases, plugin</PackageTags>
     <Title>In-App Billing Plugin for Xamarin and Windows</Title>
@@ -50,7 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
-    <Compile Include="**\*.shared.cs" />
+    <Compile Include="**\*.shared.cs" /> 
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 

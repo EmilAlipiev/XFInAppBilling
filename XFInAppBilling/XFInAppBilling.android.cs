@@ -9,6 +9,7 @@ using Plugin.CurrentActivity;
 
 namespace Plugin.XFInAppBilling
 {
+    [Preserve(AllMembers = true)]
     public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, ISkuDetailsResponseListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener, IPurchaseHistoryResponseListener
     {
         private const string TAG = "BillingManager";
@@ -77,7 +78,7 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<bool> CheckIfUserHasActiveSubscriptionAsync(string productId, ItemType itemType = ItemType.InAppPurchase)
         {
-            var purchases = await GetPurchases(itemType);
+            var purchases = await GetPurchasesAsync(itemType);
 
             bool found = false;
             if (purchases?.Count > 0)
@@ -97,7 +98,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType"></param>
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchaseHistory(ItemType itemType)
+        public async Task<List<PurchaseResult>> GetPurchaseHistoryAsync(ItemType itemType)
         {
             if (BillingClient == null || !BillingClient.IsReady)
             {
@@ -105,8 +106,7 @@ namespace Plugin.XFInAppBilling
             }
 
             tcsPurchaseHistory = new TaskCompletionSource<List<PurchaseResult>>();
-
-            var prms = SkuDetailsParams.NewBuilder();
+ 
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
             BillingClient.QueryPurchaseHistoryAsync(type, this);
 
@@ -118,7 +118,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType"></param>
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchases(ItemType itemType)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase = null)
         {
             if (BillingClient == null || !BillingClient.IsReady)
             {
@@ -135,7 +135,7 @@ namespace Plugin.XFInAppBilling
         }
 
         private SkuDetails ProductToPurcase { get; set; }
-        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, bool verifyPurchase = false)
+        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
         {
             var purchaseResult = new PurchaseResult();
             var productIds = new List<string>();
