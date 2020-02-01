@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Plugin.XFInAppBilling
 {
+    /// <summary>
+    /// Interface for XFInAppBilling
+    /// </summary>
     [Preserve(AllMembers = true)]
     public interface IXFInAppBilling
     {
