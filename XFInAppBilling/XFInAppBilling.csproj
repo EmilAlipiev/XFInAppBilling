@@ -11,7 +11,7 @@
     <PackageId>XFInAppBilling</PackageId>
     <PackOnBuild>true</PackOnBuild>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>   
-    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageLicenseUrl>https://github.com/EmilAlipiev/XFInAppBilling/blob/master/LICENSE</PackageLicenseUrl>
     <Owners>EmilAlipiev</Owners>
     <PackageProjectUrl>https://github.com/EmilAlipiev/XFInAppBilling</PackageProjectUrl>
     <Summary>Xamarin and Windows plugin to In-App Billing.</Summary>
@@ -21,7 +21,7 @@
     <Copyright>Copyright 2020</Copyright>
     <RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBillingPlugin</RepositoryUrl>
     <PackageReleaseNotes>See: https://github.com/EmilAlipiev/XFInAppBillingPlugin</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/EmilAlipiev/XFInAppBilling/master/Icons/iaplogo.png?token=ACPQQS7Q36KUNPGWXXT7UTS6GVSOM</PackageIconUrl>
+    <Icon>https://raw.githubusercontent.com/EmilAlipiev/XFInAppBilling/master/Icons/iaplogo.png?token=ACPQQS7Q36KUNPGWXXT7UTS6GVSOM</Icon>
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
