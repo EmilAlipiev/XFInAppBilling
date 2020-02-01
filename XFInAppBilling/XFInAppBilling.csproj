@@ -21,7 +21,7 @@
     <Copyright>Copyright 2020</Copyright>
     <RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBillingPlugin</RepositoryUrl>
     <PackageReleaseNotes>See: https://github.com/EmilAlipiev/XFInAppBillingPlugin</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/jamesmontemagno/InAppBillingPlugin/master/art/icon_128.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/EmilAlipiev/XFInAppBilling/master/Icons/iaplogo.png?token=ACPQQS7Q36KUNPGWXXT7UTS6GVSOM</PackageIconUrl>
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
