@@ -6,30 +6,27 @@
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.0.0-pre</Version>
     <Authors>Emil Alipiev</Authors>
     <PackageId>XFInAppBilling</PackageId>
     <PackOnBuild>true</PackOnBuild>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageIconUrl></PackageIconUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>   
     <PackageLicenseUrl></PackageLicenseUrl>
     <Owners>EmilAlipiev</Owners>
     <PackageProjectUrl>https://github.com/EmilAlipiev/XFInAppBilling</PackageProjectUrl>
     <Summary>Xamarin and Windows plugin to In-App Billing.</Summary>
-    <PackageTags>xamarin, xamarin.forms, android, ios, uwp, windows phone, In-App Billing, purchases, plugin</PackageTags>
+    <PackageTags>xamarin, xamarin.forms, android, ios, uwp, windows phone, In-App Billing, purchases, plugin, billingclient, storecontext, tizen, amazon iap</PackageTags>
     <Title>In-App Billing Plugin for Xamarin and Windows</Title>
-    <Description>
-      Xamarin and Windows Plugin to In-App Billing. Get item information, purchase items, and restore purchases with a cross-platform API.
-      Read the full documenation on the projects page.
-    </Description>
+    <Description>Xamarin Forms plugin for Android, IOS, TVOS and UWP. Fully cross platform uses latest platform specific in app purchases apis. For Android uses BillingClient, For UWP uses StoreContext and latest IOS in app billing Api.</Description>
     <Copyright>Copyright 2020</Copyright>
     <RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBillingPlugin</RepositoryUrl>
     <PackageReleaseNotes>See: https://github.com/EmilAlipiev/XFInAppBillingPlugin</PackageReleaseNotes>
+    <PackageIconUrl>https://raw.githubusercontent.com/jamesmontemagno/InAppBillingPlugin/master/art/icon_128.png</PackageIconUrl>
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <LangVersion>8.0</LangVersion>
-    <DefineConstants>$(DefineConstants);</DefineConstants>
+    <DefineConstants>$(DefineConstants);</DefineConstants> 
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
     <DebugType>full</DebugType>
@@ -49,7 +46,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
+    <!--<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />-->
     <Compile Include="**\*.shared.cs" />    
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
@@ -93,4 +90,5 @@
   <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.TVOS')) ">
     <Compile Include="**\*.apple.cs" />
   </ItemGroup>
+ 
 </Project>
