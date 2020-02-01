@@ -31,6 +31,13 @@ namespace Plugin.XFInAppBilling
         TaskCompletionSource<List<PurchaseResult>> tcsPurchaseHistory;
         TaskCompletionSource<bool> tcsAcknowledge;
 
+
+        #region API Functions
+        
+        /// <summary>
+        /// Start a connection on billingclient
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> ConnectAsync()
         {
             tcsConnect = new TaskCompletionSource<bool>();
@@ -43,9 +50,12 @@ namespace Plugin.XFInAppBilling
 
         }
 
-
-        #region API Functions
-
+        /// <summary>
+        /// Get Product Informations with Prices
+        /// </summary>
+        /// <param name="ProductIds">skus of products</param>
+        /// <param name="itemType">Subscription or iap product</param>
+        /// <returns></returns>
         public async Task<List<InAppBillingProduct>> GetProductsAsync(List<string> ProductIds, ItemType itemType = ItemType.InAppPurchase)
         {
             if (BillingClient == null || !BillingClient.IsReady)
@@ -64,6 +74,10 @@ namespace Plugin.XFInAppBilling
 
 
         }
+        /// <summary>
+        /// Dispose and disconnect from BillingClient
+        /// </summary>
+        /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -133,8 +147,18 @@ namespace Plugin.XFInAppBilling
             return purchases;
 
         }
-
+        /// <summary>
+        /// temprorily holds the product to purchase
+        /// </summary>
         private SkuDetails ProductToPurcase { get; set; }
+        /// <summary>
+        /// Does a purchase on BillingClient
+        /// </summary>
+        /// <param name="productId">Sku of Product or Subscription to purchase</param>
+        /// <param name="itemType">subscription or iap product</param>
+        /// <param name="payload">developer payload to verify</param>
+        /// <param name="verifyPurchase">not used, only for IOS</param>
+        /// <returns></returns>
         public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
         {
             var purchaseResult = new PurchaseResult();
@@ -152,6 +176,10 @@ namespace Plugin.XFInAppBilling
 
         }
 
+        /// <summary>
+        /// Disconnects from BillingClient
+        /// </summary>
+        /// <returns></returns>
         public bool Disconnect()
         {
             if (BillingClient != null)
@@ -193,6 +221,11 @@ namespace Plugin.XFInAppBilling
 
         #endregion
 
+        /// <summary>
+        /// Completes the Purchase
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns></returns>
         private async Task<PurchaseResult> DoPurchaseAsync(SkuDetails product)
         {
             if (BillingClient == null || !BillingClient.IsReady)
@@ -208,6 +241,11 @@ namespace Plugin.XFInAppBilling
 
         #region ResponseHandlers
 
+        /// <summary>
+        /// Purchase History Response Handler
+        /// </summary>
+        /// <param name="billingResult"></param>
+        /// <param name="purchases"></param>
         public void OnPurchaseHistoryResponse(BillingResult billingResult, IList<PurchaseHistoryRecord> purchases)
         {
             PurchaseHistoryResult = new List<PurchaseResult>();
@@ -232,6 +270,11 @@ namespace Plugin.XFInAppBilling
             GetResponseCode(billingResult.ResponseCode);
             tcsPurchaseHistory?.TrySetResult(PurchaseHistoryResult);
         }
+
+        /// <summary>
+        /// Purchase Acknowledge Handler
+        /// </summary>
+        /// <param name="billingResult">returns BillingResult</param>
         public void OnAcknowledgePurchaseResponse(BillingResult billingResult)
         {
             var isAcknowledged = billingResult.ResponseCode == BillingResponseCode.Ok;
@@ -240,6 +283,11 @@ namespace Plugin.XFInAppBilling
             tcsAcknowledge?.TrySetResult(isAcknowledged);
         }
 
+        /// <summary>
+        /// Purchase Handler
+        /// </summary>
+        /// <param name="billingResult"></param>
+        /// <param name="purchases"></param>
         public async void OnPurchasesUpdated(BillingResult billingResult, IList<Purchase> purchases)
         {
             var purchaseResult = new PurchaseResult();
@@ -267,6 +315,11 @@ namespace Plugin.XFInAppBilling
 
         }
 
+        /// <summary>
+        /// GetPurchases handler
+        /// </summary>
+        /// <param name="purchases"></param>
+        /// <returns></returns>
         private async Task<List<PurchaseResult>> GetPurchasesAsync(IList<Purchase> purchases)
         {
             var purchaseResults = new List<PurchaseResult>();
@@ -315,6 +368,11 @@ namespace Plugin.XFInAppBilling
 
         }
 
+        /// <summary>
+        /// Sku/Product details Handler
+        /// </summary>
+        /// <param name="billingResult"></param>
+        /// <param name="skuDetails"></param>
         public void OnSkuDetailsResponse(BillingResult billingResult, IList<SkuDetails> skuDetails)
         {
             InAppBillingProducts = new List<InAppBillingProduct>();
@@ -356,12 +414,20 @@ namespace Plugin.XFInAppBilling
             GetResponseCode(billingResult.ResponseCode);
             tcsProducts?.TrySetResult(InAppBillingProducts);
         }
+
+        /// <summary>
+        /// Disconnect Handler
+        /// </summary>
         public async void OnBillingServiceDisconnected()
         {
             await ConnectAsync();
             tcsConnect?.TrySetResult(false);
         }
 
+        /// <summary>
+        /// Connect Handler
+        /// </summary>
+        /// <param name="billingResult"></param>
         public void OnBillingSetupFinished(BillingResult billingResult)
         {
             IsServiceConnected = billingResult.ResponseCode == BillingResponseCode.Ok;
@@ -373,6 +439,12 @@ namespace Plugin.XFInAppBilling
                 tcsConnect?.SetException(exception);
         }
         #endregion
+
+        /// <summary>
+        /// Returns Response codes for each api calls
+        /// </summary>
+        /// <param name="billingResponseCode"></param>
+        /// <returns></returns>
         private InAppBillingPurchaseException GetResponseCode(BillingResponseCode billingResponseCode)
         {
             switch (billingResponseCode)
@@ -418,8 +490,9 @@ namespace Plugin.XFInAppBilling
             throw new NotImplementedException();
         }
 
+        #region NOTUSED FOR ANDROID
         /// <summary>
-        /// IOS only, not implemented for Android
+        /// IOS only, not implemented for Android   
         /// </summary>
         /// <param name="purchase"></param>
         /// <returns></returns>
@@ -448,6 +521,7 @@ namespace Plugin.XFInAppBilling
         public Task<bool> VerifyPreviousPurchaseAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase, string productId)
         {
             throw new NotImplementedException();
-        }
+        } 
+        #endregion
     }
 }

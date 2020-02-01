@@ -22,7 +22,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="productId">in app purchase or subscription Id to be purchased</param>
         /// <param name="itemType">only used for Google, not used for UWP, Amazon</param>
         /// <param name="payload">only used for Google, not used for UWP, Amazon</param>
-        /// <param name="verifyPurchase">only used for Google, not used for UWP, Amazon</param>
+        /// <param name="verifyPurchase">only used for Google and IOS, not used for UWP, Amazon</param>
         /// <returns></returns>
         Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null);
 

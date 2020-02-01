@@ -363,16 +363,7 @@ namespace Plugin.XFInAppBilling
                 default:
                     return new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId };
             }
-
-            //try
-            //{
-            //    StoreServicesCustomEventLogger logger = StoreServicesCustomEventLogger.GetDefault();
-            //    logger.Log($"Purchase Result - {productId}");
-            //}
-            //catch (Exception)
-            //{
-            //}
-
+ 
         }
 
         public Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken)
@@ -384,6 +375,7 @@ namespace Plugin.XFInAppBilling
         {
             throw new NotImplementedException();
         }
+        #region NOTUSED FOR UWP
 
         /// <summary>
         ///  IOS only, not implemented for Android
@@ -415,6 +407,7 @@ namespace Plugin.XFInAppBilling
         public Task<bool> VerifyPreviousPurchaseAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase, string productId)
         {
             throw new NotImplementedException();
-        }
+        } 
+        #endregion
     }
 }
