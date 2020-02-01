@@ -6,6 +6,9 @@ using Windows.Services.Store;
 
 namespace Plugin.XFInAppBilling
 {
+    /// <summary>
+    /// UWP implementation
+    /// </summary>
     public class XFInAppBillingImplementation : IXFInAppBilling
     {
         private StoreContext context = null;
