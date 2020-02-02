@@ -1,4 +1,4 @@
-# Xamarin.Forms.InAppBilling
+# XFInAppBilling
 
 Cross platform in app billing library for Android, IOS and UWP. 
 it uses billingclient api of Android and StoreContext from UWP. See below, function references implemented.
