@@ -1,6 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid90;Xamarin.iOS10;Xamarin.TVOS10;uap10.0.18362</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;Xamarin.iOS10;Xamarin.TVOS10;MonoAndroid90;MonoAndroid10.0;tizen40;</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0.16299;</TargetFrameworks>
     <AssemblyName>XFInAppBilling</AssemblyName>
     <RootNamespace>XFInAppBilling</RootNamespace>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
@@ -37,13 +38,16 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+    <!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- sourcelink: Embed source files that are not tracked by the source control manager to the PDB -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- sourcelink: Include PDB in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01" PrivateAssets="All" />
-  </ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup> 
   <ItemGroup>
     <!--<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />-->
     <Compile Include="**\*.shared.cs" />    
@@ -57,10 +61,7 @@
   <ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) "> 
     <Compile Include="**\*.uwp.cs" />
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.9" />     
-    <PackageReference Include="Microsoft.Services.Store.SDK" Version="10.1705.16001" />
-    <SDKReference Include="WindowsDesktop, Version=10.0.18362.0">
-      <Name>Windows Desktop Extensions for the UWP</Name>
-    </SDKReference>
+    <PackageReference Include="Microsoft.Services.Store.SDK" Version="10.1705.16001" />  
   </ItemGroup>
   
   <Target Name="_RemoveNonExistingResgenFile" BeforeTargets="CoreCompile" Condition="'$(_SdkSetAndroidResgenFile)' == 'true' And '$(AndroidResgenFile)' != '' And !Exists('$(AndroidResgenFile)')">
@@ -89,6 +90,13 @@
   <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.TVOS')) ">
     <Compile Include="**\*.apple.cs" />
   </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('tizen')) ">
+    <PackageReference Include="Tizen.NET" Version="4.0.0" />
+    <Compile Include="**\*.tizen.cs" />
+    <Compile Include="**\*.tizen.*.cs" />
+  </ItemGroup>
+  
   <PropertyGroup>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>

@@ -9,15 +9,20 @@ using Plugin.CurrentActivity;
 
 namespace Plugin.XFInAppBilling
 {
+    /// <summary>
+    /// Android Implementation
+    /// </summary>
     [Preserve(AllMembers = true)]
     public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, ISkuDetailsResponseListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener, IPurchaseHistoryResponseListener
     {
-        private const string TAG = "BillingManager";
         public const int BILLING_MANAGER_NOT_INITIALIZED = -1;
         private bool IsServiceConnected;
 
         private Context CurrentContext => CrossCurrentActivity.Current.Activity;
 
+        /// <summary>
+        /// BillingClient to call api functions
+        /// </summary>
         public BillingClient BillingClient { get; set; }
 
         // private PurchaseResult PurchaseResult { get; set; } = new PurchaseResult();

@@ -14,10 +14,18 @@ namespace XFInAppBilling.Tests
 	[DesignTimeVisible(false)]
 	public partial class MainPage : ContentPage
 	{
+		public bool IsConnected { get; set; } = false;
 		public MainPage()
 		{
 			InitializeComponent();
 		}
+		protected override async  void OnAppearing()
+		{
+			base.OnAppearing();
+
+			IsConnected = await CrossXFInAppBilling.Current.ConnectAsync();
+		}
+
 
 		private void ButtonConsumable_Clicked(object sender, EventArgs e)
 		{

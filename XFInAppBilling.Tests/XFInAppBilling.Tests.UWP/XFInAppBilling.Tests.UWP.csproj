@@ -144,10 +144,14 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="4.3.0.908675" />
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.9"/>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.9" />
     <PackageReference Include="Xamarin.Essentials" Version="1.3.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\XFInAppBilling\XFInAppBilling.csproj">
+      <Project>{876211e4-4b82-4c15-8fc1-eba4880ba694}</Project>
+      <Name>XFInAppBilling</Name>
+    </ProjectReference>
     <ProjectReference Include="..\XFInAppBilling.Tests\XFInAppBilling.Tests.csproj">
       <Project>{642F5819-66BA-4407-9E36-FBB08433E2FA}</Project>
       <Name>XFInAppBilling.Tests</Name>

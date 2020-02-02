@@ -9,10 +9,15 @@ namespace Plugin.XFInAppBilling
     /// <summary>
     /// UWP implementation
     /// </summary>
-    public class XFInAppBillingImplementation : IXFInAppBilling
+    public class XFInAppBillingImplementation : IXFInAppBilling, IDisposable
     {
         private StoreContext context = null;
         StoreProduct storeProduct;
+
+        public XFInAppBillingImplementation()
+        {
+            Dispose(false);
+        }
 
         #region API Functions
         /// <summary>
@@ -410,7 +415,32 @@ namespace Plugin.XFInAppBilling
         public Task<bool> VerifyPreviousPurchaseAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase, string productId)
         {
             throw new NotImplementedException();
-        } 
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private bool disposed = false;
+        /// <summary>
+        /// Dispose method
+        /// </summary>
+        /// <param name="disposing"></param>
+        public virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    //dispose only
+                }
+
+                disposed = true;
+            }
+        }
+
         #endregion
     }
 }

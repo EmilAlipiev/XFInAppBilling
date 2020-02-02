@@ -10,7 +10,7 @@ namespace Plugin.XFInAppBilling
     /// Interface for XFInAppBilling
     /// </summary>
     [Preserve(AllMembers = true)]
-    public interface IXFInAppBilling
+    public interface IXFInAppBilling: IDisposable
     {
         /// <summary>
         /// Gets all the available/purchasable IAPs and Subscriptions
