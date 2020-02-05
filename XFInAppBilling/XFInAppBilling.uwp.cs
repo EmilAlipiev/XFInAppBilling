@@ -124,36 +124,14 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<bool> CheckIfUserHasActiveSubscriptionAsync(string subscriptionStoreId, ItemType itemType = ItemType.InAppPurchase)
         {
-            if (subscriptionStoreId != null)
-            {
-                var purchases = await GetPurchasesAsync();
-                if (purchases?.Count > 0)
-                {
-                    foreach (var purchase in purchases)
-                    {
-                        //TODO: verify here if can be done with any subscriptionStoreId
-                        if (purchase.PurchaseToken.StartsWith("sub_") || purchase.Sku.StartsWith("sub_"))
-                        {
-                            if (purchase.PurchaseToken.StartsWith(subscriptionStoreId) && purchase.PurchaseState == PurchaseState.Purchased && purchase.ExpirationDate < DateTime.Now)
-                            {
-                                // The expiration date is available in the license.ExpirationDate property.
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (context == null)
-                    context = StoreContext.GetDefault();
-                StoreAppLicense appLicense = await context.GetAppLicenseAsync();
-                return appLicense.AddOnLicenses.Any(s => s.Value.IsActive && s.Value.ExpirationDate < DateTime.Now);
-            }
+            if (context == null)
+                context = StoreContext.GetDefault();
+            StoreAppLicense appLicense = await context.GetAppLicenseAsync();
 
-            return false;
+            return appLicense.AddOnLicenses.Any(s => (s.Value.InAppOfferToken.StartsWith("sub_") || s.Value.SkuStoreId.StartsWith("sub_"))
+            && s.Value.IsActive && s.Value.ExpirationDate > DateTime.Now);
+
         }
-
         /// <summary>
         /// Get All Purchases
         /// </summary>
