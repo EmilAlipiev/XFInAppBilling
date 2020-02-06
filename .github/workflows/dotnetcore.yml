@@ -1,7 +1,9 @@
-name: .NET Core
+name: Nuget Package Deploy
 
-on: [push]
-
+on: 
+ push:
+   branches: 
+     - master
 jobs:
   build:
 
