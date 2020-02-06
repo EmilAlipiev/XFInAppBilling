@@ -7,7 +7,7 @@
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-    <Version>1.0.0.0-pre</Version>
+    <Version>1.0.0.2-pre</Version>
     <Authors>Emil Alipiev</Authors>
     <PackageId>XFInAppBilling</PackageId>
     <PackOnBuild>true</PackOnBuild>
@@ -69,7 +69,12 @@
       <Compile Remove="$(AndroidResgenFile)" />
     </ItemGroup>
   </Target>
-
+  
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+  
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
     <DesignTimeBuild>false</DesignTimeBuild>
   </PropertyGroup>
