@@ -12,11 +12,11 @@ jobs:
     - name: Setup Nuget.exe
       uses: warrenbuckley/Setup-Nuget@v1
     - name: Restore Nuget
-      run: nuget restore  ../XFInAppBilling.sln
+      run: nuget restore  XFInAppBilling.sln
     - name: Setup MSBuild.exe
       uses: warrenbuckley/Setup-MSBuild@v1
     - name: Build with dotnet
-      run: msbuild ../XFInAppBilling.sln -property:Configuration=Release
+      run: msbuild XFInAppBilling.sln -property:Configuration=Release
     - name: Push Package to nuget
       run: dotnet nuget push **/*.nugpkg
              --api-key ${{ secrets.nugetapikey }}
