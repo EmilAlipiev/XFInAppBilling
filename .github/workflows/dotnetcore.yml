@@ -18,6 +18,6 @@ jobs:
     - name: Build with dotnet
       run: msbuild XFInAppBilling.sln -property:Configuration=Release
     - name: Push Package to nuget
-      run: dotnet nuget push **/*.nugpkg
+      run: dotnet nuget push **/*.nupkg
              --api-key ${{ secrets.nugetapikey }}
              --source https://api.nuget.org/v3/index.json
