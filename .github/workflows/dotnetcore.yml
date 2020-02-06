@@ -28,7 +28,3 @@ jobs:
         run: dotnet nuget push **/*.nugpkg
              --api -key ${{ secrets.nugetapikey }}
              --source https://api.nuget.org/v3/index.json
-       
-        - 
-    
-    
