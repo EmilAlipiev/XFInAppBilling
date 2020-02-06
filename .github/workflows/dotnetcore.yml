@@ -9,8 +9,14 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2     
+    - name: Setup Nuget.exe
+      uses: warrenbuckley/Setup-Nuget@v1
+    - name: Restore Nuget
+      run: nuget restore  XFInAppBilling/XFInAppBilling.sln
+    - name: Setup MSBuild.exe
+      uses: warrenbuckley/Setup-MSBuild@v1
     - name: Build with dotnet
-      run: dotnet msbuild -property:Configuration=Release
+      run: msbuild XFInAppBilling/XFInAppBilling.sln -property:Configuration=Release
     - name: Push Package to nuget
       run: dotnet nuget push **/*.nugpkg
              --api-key ${{ secrets.nugetapikey }}
