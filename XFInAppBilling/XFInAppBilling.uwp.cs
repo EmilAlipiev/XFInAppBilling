@@ -14,6 +14,9 @@ namespace Plugin.XFInAppBilling
         private StoreContext context = null;
         StoreProduct storeProduct;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public XFInAppBillingImplementation()
         {
             Dispose(false);
@@ -137,7 +140,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType">not used for UWP</param>
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null, string verifyOnlyProductId= null)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null, string verifyOnlyProductId = null)
         {
             if (context == null)
                 context = StoreContext.GetDefault();
@@ -217,7 +220,10 @@ namespace Plugin.XFInAppBilling
             return purchaseHistoryResult;
         }
 
-
+        /// <summary>
+        /// Disconnects iap instance
+        /// </summary>
+        /// <returns></returns>
         public bool Disconnect()
         {
             return true;
@@ -330,37 +336,81 @@ namespace Plugin.XFInAppBilling
                 extendedError = result.ExtendedError.Message;
             }
 
-            switch (result.Status)
+            return result.Status switch
             {
-                case StorePurchaseStatus.Succeeded:
-                    // Show a UI to acknowledge that the customer has purchased your subscription 
-                    // and unlock the features of the subscription. 
-                    return new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId };
+                StorePurchaseStatus.Succeeded => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId },// Show a UI to acknowledge that the customer has purchased your subscription 
+                                                                                                                                   // and unlock the features of the subscription. 
+                StorePurchaseStatus.NotPurchased => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+                StorePurchaseStatus.ServerError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+                StorePurchaseStatus.NetworkError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+                StorePurchaseStatus.AlreadyPurchased => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId },
+                _ => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+            };
+        }
 
-                case StorePurchaseStatus.NotPurchased:
-                    return new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId };
-                case StorePurchaseStatus.ServerError:
-                    return new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId };
-                case StorePurchaseStatus.NetworkError:
-                    return new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId };
+        /// <summary>
+        /// Consumes a consumable iap
+        /// </summary>
+        /// <param name="productId">Product sku or storeId</param>
+        /// <param name="purchaseToken">not used in uwp</param>
+        /// <returns></returns>
+        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken)
+        {
+            return await ConsumePurchase(productId, null);
+        }
+         
+        /// <summary>
+        /// Consumes a consumable iap
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="itemType"></param>
+        /// <param name="payload"></param>
+        /// <param name="verifyPurchase">not used in uwp</param>
+        /// <returns></returns>
+        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null)
+        {
+            return await ConsumePurchase(productId, payload);
+        }
 
-                case StorePurchaseStatus.AlreadyPurchased:
-                    return new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId };
-                default:
-                    return new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId };
+        private async Task<PurchaseResult> ConsumePurchase(string productId, string payload)
+        {
+            if (context == null)
+            {
+                context = StoreContext.GetDefault();
+                // If your app is a desktop app that uses the Desktop Bridge, you
+                // may need additional code to configure the StoreContext object.
+                // For more info, see https://aka.ms/storecontext-for-desktop.
             }
- 
+
+            // This is an example for a Store-managed consumable, where you specify the actual number
+            // of units that you want to report as consumed so the Store can update the remaining
+            // balance. For a developer-managed consumable where you maintain the balance, specify 1
+            // to just report the add-on as fulfilled to the Store.
+            uint quantity = 1;
+            string addOnStoreId = productId;
+            if (payload == null || !Guid.TryParse(payload, out Guid trackingId))
+                trackingId = Guid.NewGuid();
+
+            StoreConsumableResult result = await context.ReportConsumableFulfillmentAsync(
+                addOnStoreId, quantity, trackingId);
+
+            // Capture the error message for the operation, if any.
+            string extendedError = string.Empty;
+            if (result.ExtendedError != null)
+            {
+                extendedError = result.ExtendedError.Message;
+            }
+
+            return result.Status switch
+            {
+                StoreConsumableStatus.Succeeded => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId },// Show a UI to acknowledge that the customer has purchased your subscription                                                                                                                   // and unlock the features of the subscription. 
+                StoreConsumableStatus.InsufficentQuantity => new PurchaseResult() { PurchaseState = PurchaseState.InsufficentQuantity, Sku = productId },
+                StoreConsumableStatus.ServerError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+                StoreConsumableStatus.NetworkError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+                _ => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+            };
         }
 
-        public Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null)
-        {
-            throw new NotImplementedException();
-        }
         #region NOTUSED FOR UWP
 
         /// <summary>
@@ -395,6 +445,9 @@ namespace Plugin.XFInAppBilling
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Dispose
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
