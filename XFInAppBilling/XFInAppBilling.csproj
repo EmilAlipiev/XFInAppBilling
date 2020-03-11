@@ -3,11 +3,11 @@
     <TargetFrameworks>netstandard2.0;Xamarin.iOS10;Xamarin.TVOS10;MonoAndroid90;MonoAndroid10.0;tizen40;</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0.16299;</TargetFrameworks>
     <AssemblyName>XFInAppBilling</AssemblyName>
-    <RootNamespace>XFInAppBilling</RootNamespace>
+    <RootNamespace>Plugin.XFInAppBilling</RootNamespace>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-    <Version>1.0.0.2-pre</Version>
+    <Version>1.0.0.0</Version>
     <Authors>Emil Alipiev</Authors>
     <PackageId>XFInAppBilling</PackageId>
     <PackOnBuild>true</PackOnBuild>
@@ -49,12 +49,12 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup> 
   <ItemGroup>
-    <!--<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />-->
-    <Compile Include="**\*.shared.cs" />    
+     <Compile Include="**\*.shared.cs" />
+    <!--<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />--> 
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">   
     <Compile Include="**\*.netstandard.cs" />
   </ItemGroup>
 
@@ -96,8 +96,7 @@
     <Compile Include="**\*.apple.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('tizen')) ">
-    <PackageReference Include="Tizen.NET" Version="4.0.0" />
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('tizen')) ">  
     <Compile Include="**\*.tizen.cs" />
     <Compile Include="**\*.tizen.*.cs" />
   </ItemGroup>
@@ -105,4 +104,5 @@
   <PropertyGroup>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
+   
 </Project>

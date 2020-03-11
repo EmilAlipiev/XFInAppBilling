@@ -6,8 +6,10 @@ namespace XFInAppBilling.Tests
 {
     public partial class App : Application
     {
-        public App()
+        public static bool IsAmazon { get; set; } = false;
+        public App(bool isAmazon=false)
         {
+            IsAmazon = isAmazon;
             InitializeComponent();
 
             MainPage = new MainPage();
