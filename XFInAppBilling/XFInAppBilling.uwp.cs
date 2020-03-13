@@ -129,7 +129,7 @@ namespace Plugin.XFInAppBilling
             StoreAppLicense appLicense = await context.GetAppLicenseAsync();
 
             return appLicense.AddOnLicenses.Any(s => (s.Value.InAppOfferToken.StartsWith("sub_") || s.Value.SkuStoreId.StartsWith("sub_"))
-            && s.Value.IsActive && s.Value.ExpirationDate > DateTime.Now);
+             && s.Value.ExpirationDate > DateTime.Now);
 
         }
         /// <summary>
@@ -150,8 +150,8 @@ namespace Plugin.XFInAppBilling
                 {
                     StoreLicense license = addOnLicense.Value;
                     var purchaseHistory = new PurchaseResult();
-                    purchaseHistory.Sku = license.SkuStoreId;
-                    purchaseHistory.PurchaseToken = license.InAppOfferToken;
+                    purchaseHistory.Sku = license.InAppOfferToken; //UWP SkuStoreId is different than Product ID, InAppOfferToken is the product ID
+                    purchaseHistory.PurchaseToken = license.SkuStoreId; 
 
                     purchaseHistory.ExpirationDate = license.ExpirationDate;
                     if (!license.IsActive)
