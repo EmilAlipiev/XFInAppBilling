@@ -68,12 +68,6 @@
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\XFInAppBilling.Amazon\XFInAppBilling.Amazon.csproj">
-      <Project>{fd6e39a9-dc2c-4a98-8ba4-f6d3eb02aaec}</Project>
-      <Name>XFInAppBilling.Amazon</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
