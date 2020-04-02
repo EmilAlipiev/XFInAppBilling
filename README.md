@@ -55,10 +55,12 @@ In general you should create another android project for Amazon (see the test pr
 
 If you follow above suggestion, 
 -  install the XFInAppBilling Nuget on .net standard, android, uwp and ios projects (dont install on amazon project)
--  Copy this folder https://github.com/EmilAlipiev/XFInAppBilling/tree/Master/XFInAppBilling.Tests/XFInAppBilling.Tests.Amazon/IAP
+-  Copy  [this folder]
 into your amazon android project
 - reference the AmazonIapV2Android.dll using add reference
 - Adjust the namespace inside this class InAppBillingImplementation.cs 
 You should be good to go :)
 
 Here is how you can work with it
+
+ [this folder]: <https://github.com/EmilAlipiev/XFInAppBilling/tree/Master/XFInAppBilling.Tests/XFInAppBilling.Tests.Amazon/IAP>
