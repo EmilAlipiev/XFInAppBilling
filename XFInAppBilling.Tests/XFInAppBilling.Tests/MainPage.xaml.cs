@@ -9,7 +9,7 @@ using Xamarin.Forms;
 
 namespace XFInAppBilling.Tests
 {
-    extern alias amazon;
+     
     // Learn more about making custom code visible in the Xamarin.Forms previewer
     // by visiting https://aka.ms/xamarinforms-previewer
     [DesignTimeVisible(false)]
@@ -17,16 +17,8 @@ namespace XFInAppBilling.Tests
     {
         private IXFInAppBilling GetIAPbilling()
         {
-            if (App.IsAmazon)
-            {
-                var result = amazon.Plugin.XFInAppBilling.Amazon.CrossXFInAppBilling.Current;
-                return result;
-            }
-            else
-            {
-                var result = CrossXFInAppBilling.Current;
-                return result;
-            }
+            var result = CrossXFInAppBilling.Current;
+            return result;
         }
 
         public bool IsConnected { get; set; } = false;

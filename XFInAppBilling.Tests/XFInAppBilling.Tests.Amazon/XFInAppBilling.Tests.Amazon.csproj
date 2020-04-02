@@ -52,6 +52,9 @@
     <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AmazonIapV2Android">
+      <HintPath>IAP\AmazonIapV2Android.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -60,6 +63,7 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IAP\InAppBillingImplementation.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -105,6 +109,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\XFInAppBilling\XFInAppBilling.csproj">
+      <Project>{876211E4-4B82-4C15-8FC1-EBA4880BA694}</Project>
+      <Name>XFInAppBilling</Name>
+    </ProjectReference>
     <ProjectReference Include="..\XFInAppBilling.Tests\XFInAppBilling.Tests.csproj">
       <Project>{8fea80a4-3a7e-49bb-91b9-1e213dfd34c4}</Project>
       <Name>XFInAppBilling.Tests</Name>

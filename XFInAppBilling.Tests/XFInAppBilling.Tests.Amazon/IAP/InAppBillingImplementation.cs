@@ -4,10 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Android.BillingClient.Api;
 using Xamarin.Forms;
 using XFInAppBilling.Tests.Amazon.IAP;
-
+ 
 [assembly: Dependency(typeof(InAppBillingImplementation))]
 namespace XFInAppBilling.Tests.Amazon.IAP
 {
@@ -159,9 +158,8 @@ namespace XFInAppBilling.Tests.Amazon.IAP
 
                     return await taskCompletionSource.Task;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-
                     return new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId };
                 }
 
@@ -176,15 +174,16 @@ namespace XFInAppBilling.Tests.Amazon.IAP
             /// <returns></returns>
             public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null, string verifyOnlyProductId = null)
             {
-                var PurchaseHistoryResult = new List<PurchaseResult>();
+                var purchaseHistoryResult = new List<PurchaseResult>();
                 var purchaseReceipts = await GetPurchaseReceipts();
                 if (purchaseReceipts?.Count > 0)
                 {
                     foreach (var purchase in purchaseReceipts)
                     {
-                        var purchaseHistory = new PurchaseResult();
-                        purchaseHistory.Sku = purchase.Sku;
-                        purchaseHistory.PurchaseToken = purchase.ReceiptId;
+                        var purchaseHistory = new PurchaseResult
+                        {
+                            Sku = purchase.Sku, PurchaseToken = purchase.ReceiptId
+                        };
 
                         if (purchase.PurchaseDate > 0)
                             purchaseHistory.PurchaseDate = DateTimeOffset.FromUnixTimeSeconds(purchase.PurchaseDate).DateTime;
@@ -199,11 +198,11 @@ namespace XFInAppBilling.Tests.Amazon.IAP
                         else
                             purchaseHistory.PurchaseState = PurchaseState.Purchased;
 
-                        PurchaseHistoryResult.Add(purchaseHistory);
+                        purchaseHistoryResult.Add(purchaseHistory);
                     }
                 }
 
-                return PurchaseHistoryResult;
+                return purchaseHistoryResult;
             }
 
             /// <summary>
@@ -341,7 +340,7 @@ namespace XFInAppBilling.Tests.Amazon.IAP
             {
                 var purchaseResult = new PurchaseResult();
 
-                if (args == null || args.PurchaseReceipt == null || args.AmazonUserData == null)
+                if (args?.PurchaseReceipt == null || args.AmazonUserData == null)
                     return purchaseResult;
 
 
