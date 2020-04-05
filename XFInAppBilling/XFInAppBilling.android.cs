@@ -551,7 +551,7 @@ namespace Plugin.XFInAppBilling
             }
             catch (Exception ex)
             {
-                _tcsProducts?.SetException(ex);
+                _tcsProducts?.TrySetException(ex);
             }
         }
 
@@ -563,11 +563,10 @@ namespace Plugin.XFInAppBilling
             try
             {
                 await ConnectAsync();
-                _tcsConnect?.TrySetResult(false);
             }
             catch (Exception ex)
             {
-                _tcsConnect?.SetException(ex);
+                _tcsConnect?.TrySetException(ex);
             }
         }
 
@@ -587,12 +586,12 @@ namespace Plugin.XFInAppBilling
                 else
                 {
                     var exception = GetErrorCode(billingResult.ResponseCode);
-                    _tcsConnect?.SetException(exception);
+                    _tcsConnect?.TrySetException(exception);
                 }
             }
             catch (Exception ex)
             {
-                _tcsConnect?.SetException(ex);
+                _tcsConnect?.TrySetException(ex);
             }
         }
 
@@ -614,7 +613,7 @@ namespace Plugin.XFInAppBilling
             }
             catch (Exception ex)
             {
-                _tcsConsume?.SetException(ex);
+                _tcsConsume?.TrySetException(ex);
             }
         }
 
