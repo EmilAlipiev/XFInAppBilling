@@ -30,7 +30,15 @@ namespace XFInAppBilling.Tests
         {
             base.OnAppearing();
 
-            IsConnected = await GetIAPbilling().ConnectAsync();
+            try
+            {
+                IsConnected = await GetIAPbilling().ConnectAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
 

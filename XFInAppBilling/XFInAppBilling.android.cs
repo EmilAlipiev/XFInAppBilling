@@ -290,23 +290,15 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         private async Task<PurchaseResult> DoPurchaseAsync(SkuDetails product)
         {
-            try
+            if (BillingClient == null || !BillingClient.IsReady)
             {
-                if (BillingClient == null || !BillingClient.IsReady)
-                {
-                    await ConnectAsync();
-                }
-                _tcsPurchase = new TaskCompletionSource<PurchaseResult>();
+                await ConnectAsync();
+            }
+            _tcsPurchase = new TaskCompletionSource<PurchaseResult>();
 
-                BillingFlowParams flowParams = BillingFlowParams.NewBuilder().SetSkuDetails(product).Build();
-                BillingResult responseCode = BillingClient.LaunchBillingFlow(CrossCurrentActivity.Current.Activity, flowParams);
-                return await _tcsPurchase?.Task ?? default;
-            }
-            catch (Exception ex)
-            {
-                _tcsPurchase?.TrySetException(ex);
-                return null;
-            }
+            BillingFlowParams flowParams = BillingFlowParams.NewBuilder().SetSkuDetails(product).Build();
+            BillingResult responseCode = BillingClient.LaunchBillingFlow(CrossCurrentActivity.Current.Activity, flowParams);
+            return await _tcsPurchase?.Task ?? default;
         }
 
         #region ResponseHandlers
@@ -600,7 +592,7 @@ namespace Plugin.XFInAppBilling
             try
             {
                 PurchaseResult purchaseResult = await GetPurchaseResult(billingResult, null);
-      
+
                 var errorCode = GetErrorCode(billingResult.ResponseCode);
                 if (errorCode != null) //No error
                 {
