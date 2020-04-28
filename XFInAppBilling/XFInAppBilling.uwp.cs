@@ -67,39 +67,45 @@ namespace Plugin.XFInAppBilling
                 foreach (KeyValuePair<string, StoreProduct> item in queryResult.Products)
                 {
                     // Access the Store product info for the add-on.
-                    StoreProduct product = item.Value;
-
-                    // For each add-on, the subscription info is available in the SKU objects in the add-on. 
-                    foreach (StoreSku sku in product.Skus)
+                    if (item.Value != null)
                     {
-                        if (sku.IsSubscription && sku.SubscriptionInfo.HasTrialPeriod == false)
-                        {
-                            // Use the sku.SubscriptionInfo property to get info about the subscription. 
-                            // For example, the following code gets the units and duration of the 
-                            // subscription billing period.
-                            StoreDurationUnit billingPeriodUnit = sku.SubscriptionInfo.BillingPeriodUnit;
-                            uint billingPeriod = sku.SubscriptionInfo.BillingPeriod;
+                        StoreProduct product = item.Value;
 
-                            Products.Add(new InAppBillingProduct()
-                            {
-                                ProductId = product.InAppOfferToken,
-                                LocalizedPrice = product.Price.FormattedRecurrencePrice,
-                                Description = sku.Description,
-                                Name = product.Title,
-                                FreeTrialPeriod = sku.SubscriptionInfo.HasTrialPeriod ? sku.SubscriptionInfo.TrialPeriod + " " + sku.SubscriptionInfo.TrialPeriodUnit.ToString() : null
-                            });
-                        }
-                        else if (ProductIds?.Count > 0 && ProductIds.Contains(product.InAppOfferToken))
+                        if (product.Skus != null)
                         {
-                            Products.Add(new InAppBillingProduct()
+                            // For each add-on, the subscription info is available in the SKU objects in the add-on. 
+                            foreach (StoreSku sku in product.Skus)
                             {
-                                ProductId = product.InAppOfferToken,
-                                LocalizedPrice = product.Price.FormattedPrice,
-                                Description = sku.Description,
-                                Name = product.Title
-                            });
-                        }
+                                if (sku.IsSubscription && sku.SubscriptionInfo != null)
+                                {
+                                    // Use the sku.SubscriptionInfo property to get info about the subscription. 
+                                    // For example, the following code gets the units and duration of the 
+                                    // subscription billing period.
+                                    StoreDurationUnit billingPeriodUnit = sku.SubscriptionInfo.BillingPeriodUnit;
+                                    uint billingPeriod = sku.SubscriptionInfo.BillingPeriod;
 
+                                    Products.Add(new InAppBillingProduct()
+                                    {
+                                        ProductId = product.InAppOfferToken,
+                                        LocalizedPrice = product.Price.FormattedRecurrencePrice,
+                                        Description = sku.Description,
+                                        Name = product.Title,
+                                        FreeTrialPeriod = sku.SubscriptionInfo.HasTrialPeriod ? sku.SubscriptionInfo.TrialPeriod + " " + sku.SubscriptionInfo.TrialPeriodUnit.ToString() : null
+                                    });
+                                }
+                                else if (ProductIds?.Count > 0 && ProductIds.Contains(product.InAppOfferToken))
+                                {
+                                    Products.Add(new InAppBillingProduct()
+                                    {
+                                        ProductId = product.InAppOfferToken,
+                                        LocalizedPrice = product.Price.FormattedPrice,
+                                        Description = sku.Description,
+                                        Name = product.Title
+                                    });
+                                }
+
+                            }
+                        }
                     }
                 }
             }
@@ -154,7 +160,7 @@ namespace Plugin.XFInAppBilling
                     StoreLicense license = addOnLicense.Value;
                     var purchaseHistory = new PurchaseResult();
                     purchaseHistory.Sku = license.InAppOfferToken; //UWP SkuStoreId is different than Product ID, InAppOfferToken is the product ID
-                    purchaseHistory.PurchaseToken = license.SkuStoreId; 
+                    purchaseHistory.PurchaseToken = license.SkuStoreId;
 
                     purchaseHistory.ExpirationDate = license.ExpirationDate;
                     if (!license.IsActive)
@@ -358,7 +364,7 @@ namespace Plugin.XFInAppBilling
         {
             return await ConsumePurchase(productId, null);
         }
-         
+
         /// <summary>
         /// Consumes a consumable iap
         /// </summary>
