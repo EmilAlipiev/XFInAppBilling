@@ -3,7 +3,7 @@ name: Nuget Package Deploy
 on: 
  push:
    branches: 
-     - master
+     - Billing221updateAndroidX
 jobs:
   build:
     runs-on: windows-latest

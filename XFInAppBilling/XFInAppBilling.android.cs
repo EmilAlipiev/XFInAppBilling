@@ -155,7 +155,7 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
         {
-            var purchaseResult = new PurchaseResult();
+            PurchaseResult purchaseResult;
             var productIds = new List<string> { productId };
 
             await GetProductsAsync(productIds, itemType);
