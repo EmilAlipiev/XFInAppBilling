@@ -1,15 +1,17 @@
 ﻿using Plugin.XFInAppBilling;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using Xamarin.Forms;
 
 namespace XFInAppBilling.Tests
 {
-     
+
     // Learn more about making custom code visible in the Xamarin.Forms previewer
     // by visiting https://aka.ms/xamarinforms-previewer
     [DesignTimeVisible(false)]
@@ -54,13 +56,15 @@ namespace XFInAppBilling.Tests
             {
                 var purchase = await GetIAPbilling().PurchaseAsync(id, ItemType.InAppPurchase, "mypayload");
 
-                if (purchase == null)
+                if (purchase != null && purchase.PurchaseState == PurchaseState.Purchased)
                 {
-                    await DisplayAlert(string.Empty, "Did not purchase", "OK");
+                    await DisplayAlert(string.Empty, "We did it!", "OK");
+
                 }
                 else
                 {
-                    await DisplayAlert(string.Empty, "We did it!", "OK");
+                    await DisplayAlert(string.Empty, "Did not purchase", "OK");
+
                 }
             }
             catch (Exception ex)
@@ -93,7 +97,7 @@ namespace XFInAppBilling.Tests
             }
         }
 
-        private   void ButtonRenewingSub_Clicked(object sender, EventArgs e)
+        private void ButtonRenewingSub_Clicked(object sender, EventArgs e)
         {
 
         }

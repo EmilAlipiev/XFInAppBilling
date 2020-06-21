@@ -77,11 +77,11 @@ namespace Plugin.XFInAppBilling
         /// Consume a purchase
         /// </summary>
         /// <param name="productId">Id/Sku of the product</param>
-        /// <param name="payload">Developer specific payload of original purchase</param>
+        /// <param name="payload">Developer specific payload of original purchase.Deprecated after billingClient 2.2</param>
         /// <param name="itemType">Type of product being consumed.</param>
         /// <param name="verifyPurchase">Verify Purchase implementation</param>
         /// <returns>If consumed successful</returns>
-        /// <exception cref="InAppBillingPurchaseException">If an error occures during processing</exception>
+        /// <exception cref="InAppBillingPurchaseException">If an error occurs during processing</exception>
         Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null);
 
         Task<bool> FinishTransaction(PurchaseResult purchase);
