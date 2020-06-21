@@ -15,7 +15,7 @@
     <Owners>EmilAlipiev</Owners>
     <PackageProjectUrl>https://github.com/EmilAlipiev/XFInAppBilling</PackageProjectUrl>
     <Summary>Xamarin and Windows plugin to In-App Billing.</Summary>
-    <PackageTags>xamarin, xamarin.forms, android, ios, uwp, windows phone, In-App Billing, purchases, plugin, billingclient, storecontext, tizen, amazon iap</PackageTags>
+    <PackageTags>InAppBilling, xamarin, xamarin.forms, android, ios, uwp, windows phone, In-App Billing, purchases, plugin, billingclient, storecontext, tizen, amazon iap</PackageTags>
     <Title>In-App Billing Plugin for Xamarin and Windows</Title>
     <Description>Xamarin Forms plugin for Android, IOS, TVOS and UWP. Fully cross platform uses latest platform specific in app purchases apis. For Android uses BillingClient, For UWP uses StoreContext and latest IOS in app billing Api.</Description>
     <Copyright>Copyright 2020</Copyright>
