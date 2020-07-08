@@ -501,7 +501,6 @@ namespace Plugin.XFInAppBilling
                             Name = product.Title,
                             Type = product.Type,
                             IconUrl = product.IconUrl,
-                            IsRewarded = product.IsRewarded,
                             IntroductoryPrice = product.IntroductoryPrice,
                             IntroductoryPriceCycles = product.IntroductoryPriceCycles,
                             IntroductoryPricePeriod = product.IntroductoryPricePeriod,

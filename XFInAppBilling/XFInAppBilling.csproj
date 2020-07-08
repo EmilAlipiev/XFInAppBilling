@@ -7,7 +7,7 @@
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-    <Version>2.0.0-beta</Version>
+    <Version>2.0.1-beta</Version>
     <Authors>Emil Alipiev</Authors>
     <PackageId>XFInAppBilling</PackageId>
     <PackOnBuild>true</PackOnBuild>
@@ -21,7 +21,7 @@
     <Copyright>Copyright 2020</Copyright>
     <RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBilling</RepositoryUrl>
     <PackageReleaseNotes>
-      AndroidX support added using XF 4.5 and BillingClient 2.2.1
+      AndroidX support added using XF 4.5 and BillingClient 3.0
       If your project is not using AndoridX and below 4.5 please use Version 1 of this library. Starting from Version 2 XF 4.5 and above is supported. I try to apply same changes on both branches.
     </PackageReleaseNotes>
     <Icon>https://raw.githubusercontent.com/EmilAlipiev/XFInAppBilling/master/Icons/iaplogo.png?token=ACPQQS7Q36KUNPGWXXT7UTS6GVSOM</Icon>
@@ -88,11 +88,9 @@
     <Compile Include="**\*.android.cs" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Plugin.CurrentActivity" Version="2.1.0.4" />
+    <PackageReference Include="Xamarin.Android.Google.BillingClient" Version="3.0.0" />
   </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework.StartsWith('MonoAndroid'))">
-    <PackageReference Include="Xamarin.Android.Google.BillingClient" Version="2.2.1" />
-  </ItemGroup>
+ 
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
     <Compile Include="**\*.apple.cs" />

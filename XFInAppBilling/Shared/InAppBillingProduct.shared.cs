@@ -45,9 +45,7 @@
         /// </summary>
         public long MicrosIntroductoryPrice { get; set; }
         /// <summary>
-        /// Gets a value indicating whether this Plugin.InAppBilling.Abstractions.InAppBillingProduct
-        //  has introductory price. This is an optional value in the answer from the server,
-        // requires a boolean to check if this exists
+        /// Gets a value indicating whether this Plugin.InAppBilling.Abstractions.InAppBillingProduct has introductory price. This is an optional value in the answer from the server, requires a boolean to check if this exists
         /// </summary>
         public bool HasIntroductoryPrice { get; }
         /// <summary>
@@ -69,7 +67,7 @@
         /// <summary>
         /// The number of subscription billing periods for which the user will be given the introductory price, such as 3.
         /// </summary>
-        public string IntroductoryPriceCycles { get; set; }
+        public int IntroductoryPriceCycles { get; set; }
         /// <summary>
         /// The billing period of the introductory price, specified in ISO 8601 format.
         /// </summary>
