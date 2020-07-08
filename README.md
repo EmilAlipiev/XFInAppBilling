@@ -21,13 +21,15 @@ Please, follow the steps as it is stated in this Plugin description
 
 Add a new C# class file in your project called "MainApplication.cs".
 Override the OnCreate method and call the Init method
-#if DEBUG
-[Application(Debuggable = true)]
-#else
-[Application(Debuggable = false)]
-#endif
-public class MainApplication : Application
-{
+
+    #if DEBUG
+        [Application(Debuggable = true)]
+    #else
+        [Application(Debuggable = false)]
+    #endif
+    
+    public class MainApplication : Application
+    {
 	public MainApplication(IntPtr handle, JniHandleOwnership transer)
 		: base(handle, transer)
 	{
@@ -38,7 +40,7 @@ public class MainApplication : Application
 		base.OnCreate();
 		CrossCurrentActivity.Current.Init(this);
 	}
-}
+    }
 
 If you already have an "Application" class in your project simply add the Init call.
 
