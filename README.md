@@ -65,7 +65,7 @@ You should be good to go :)
 
 Here is how you can work with it
 
- [this folder]: <https://github.com/EmilAlipiev/XFInAppBilling/tree/Master/XFInAppBilling.Tests/XFInAppBilling.Tests.Amazon/IAP>
+ [this folder]: <https://github.com/EmilAlipiev/XFInAppBilling/tree/master/XFInAppBilling.Tests/XFInAppBilling.Tests.Amazon/IAP>
 
  ### Xamarin.Forms 4.5 and above with AndroidX support
 if you are using AndroidX with Xamarin.forms 4.5 and above, you can try 2.0.x-pre release version. this version is using Android BillingClient 2.2.1 version and above. There arent major changes between 1.x.x version but 2.2.1 and above are using AndroidX libraries thats why wont work for old Android Support libraries
