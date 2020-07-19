@@ -1,6 +1,9 @@
 # XFInAppBilling
 
 Cross platform in app billing library for Android, IOS and UWP. 
+
+Nuget: https://www.nuget.org/packages/XFInAppBilling/
+
 it uses billingclient api of Android and StoreContext from UWP. See below, function references implemented.
 
  ### Functions overview 
