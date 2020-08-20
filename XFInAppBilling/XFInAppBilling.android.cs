@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Android.App;
 using Android.BillingClient.Api;
 using Android.Content;
-
-using Plugin.CurrentActivity;
 
 
 namespace Plugin.XFInAppBilling
@@ -19,7 +17,10 @@ namespace Plugin.XFInAppBilling
     {
         private bool _isServiceConnected;
 
-        private Context CurrentContext => CrossCurrentActivity.Current.Activity;
+        Activity Activity =>
+            Xamarin.Essentials.Platform.CurrentActivity ?? throw new NullReferenceException("Current Activity is null, ensure that the MainActivity.cs file is configuring Xamarin.Essentials in your source code so the In App Billing can use it.");
+
+        private Context CurrentContext => Android.App.Application.Context;
 
         /// <summary>
         /// BillingClient to call api functions
@@ -296,7 +297,7 @@ namespace Plugin.XFInAppBilling
             _tcsPurchase = new TaskCompletionSource<PurchaseResult>();
 
             BillingFlowParams flowParams = BillingFlowParams.NewBuilder().SetSkuDetails(product).Build();
-            BillingResult responseCode = BillingClient.LaunchBillingFlow(CrossCurrentActivity.Current.Activity, flowParams);
+            BillingResult responseCode = BillingClient.LaunchBillingFlow(Activity, flowParams);
             return await _tcsPurchase?.Task ?? default;
         }
 
