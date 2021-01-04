@@ -13,8 +13,8 @@ jobs:
       uses: NuGet/setup-nuget@v1.0.5
     - name: Restore Nuget
       run: nuget restore  XFInAppBilling/XFInAppBilling.csproj
-    - name: Setup MSBuild.exe
-      uses: warrenbuckley/Setup-MSBuild@v1
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1
     - name: Build with dotnet
       run: msbuild XFInAppBilling/XFInAppBilling.csproj -property:Configuration=Release
     - name: Push Package to nuget
