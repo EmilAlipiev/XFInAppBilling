@@ -15,7 +15,7 @@ namespace Plugin.XFInAppBilling
     /// Android Implementation
     /// </summary>
     [Preserve(AllMembers = true)]
-    public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener 
+    public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener
     {
         private bool _isServiceConnected;
 
@@ -274,7 +274,7 @@ namespace Plugin.XFInAppBilling
         {
 
             var consumeParams = ConsumeParams.NewBuilder().SetPurchaseToken(purchaseToken);
-           
+
             var response = await BillingClient.ConsumeAsync(consumeParams.Build());
 
             return await OnConsumeResponse(response.BillingResult, response.PurchaseToken);
@@ -350,6 +350,8 @@ namespace Plugin.XFInAppBilling
         /// <param name="billingResult">returns BillingResult</param>
         public void OnAcknowledgePurchaseResponse(BillingResult billingResult)
         {
+            CheckResultNotNull(billingResult);
+
             try
             {
                 var isAcknowledged = billingResult.ResponseCode == BillingResponseCode.Ok;
@@ -377,24 +379,28 @@ namespace Plugin.XFInAppBilling
         /// <param name="purchases"></param>
         public async void OnPurchasesUpdated(BillingResult billingResult, IList<Purchase> purchases)
         {
-           
-                PurchaseResult purchaseResult = await GetPurchaseResult(billingResult, purchases);
+            CheckResultNotNull(billingResult);
 
-                var errorCode = GetErrorCode(billingResult.ResponseCode);
-                if (errorCode != null) //No error
-                {
-                    _tcsPurchase?.TrySetException(errorCode);
-                }
-                else
-                {
-                    _tcsPurchase?.TrySetResult(purchaseResult);
-                }
-           
+            PurchaseResult purchaseResult = await GetPurchaseResult(billingResult, purchases);
+
+            var errorCode = GetErrorCode(billingResult.ResponseCode);
+            if (errorCode != null) //No error
+            {
+                _tcsPurchase?.TrySetException(errorCode);
+            }
+            else
+            {
+                _tcsPurchase?.TrySetResult(purchaseResult);
+            }
+
         }
 
         private async Task<PurchaseResult> GetPurchaseResult(BillingResult billingResult, IList<Purchase> purchases)
         {
             var purchaseResult = new PurchaseResult();
+
+            CheckResultNotNull(billingResult);
+
             if (billingResult.ResponseCode == BillingResponseCode.Ok && purchases != null)
             {
                 purchaseResult.PurchaseState = Plugin.XFInAppBilling.PurchaseState.Purchased;
@@ -417,7 +423,17 @@ namespace Plugin.XFInAppBilling
                 purchaseResult.PurchaseState = Plugin.XFInAppBilling.PurchaseState.Failed;
             }
 
+
+
             return purchaseResult;
+        }
+
+        private static void CheckResultNotNull(BillingResult billingResult)
+        {
+            if (billingResult == null)
+            {
+                throw new InAppBillingPurchaseException(PurchaseError.GeneralError, "BillingResult null returned");
+            }
         }
 
         /// <summary>
@@ -547,6 +563,8 @@ namespace Plugin.XFInAppBilling
         /// <param name="billingResult"></param>
         public void OnBillingSetupFinished(BillingResult billingResult)
         {
+            CheckResultNotNull(billingResult);
+
             try
             {
                 if (billingResult.ResponseCode == BillingResponseCode.Ok)
@@ -568,18 +586,19 @@ namespace Plugin.XFInAppBilling
 
         public async Task<PurchaseResult> OnConsumeResponse(BillingResult billingResult, String purchaseToken)
         {
-             
-                PurchaseResult purchaseResult = await GetPurchaseResult(billingResult, null);
+            CheckResultNotNull(billingResult);
 
-                var errorCode = GetErrorCode(billingResult.ResponseCode);
-                if (errorCode != null) //No error
-                {
-                    throw errorCode;
-                }
-                else
-                {
-                    return purchaseResult;
-                }
+            PurchaseResult purchaseResult = await GetPurchaseResult(billingResult, null);
+
+            var errorCode = GetErrorCode(billingResult.ResponseCode);
+            if (errorCode != null) //No error
+            {
+                throw errorCode;
+            }
+            else
+            {
+                return purchaseResult;
+            }
         }
 
         #endregion
