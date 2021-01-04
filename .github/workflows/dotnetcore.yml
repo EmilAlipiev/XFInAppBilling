@@ -9,8 +9,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2     
-    - name: Setup Nuget.exe
-      uses: warrenbuckley/Setup-Nuget@v1
+    - name: Setup NuGet.exe 
+      uses: NuGet/setup-nuget@v1.0.5
     - name: Restore Nuget
       run: nuget restore  XFInAppBilling/XFInAppBilling.csproj
     - name: Setup MSBuild.exe
