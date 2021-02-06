@@ -1,114 +1,116 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;Xamarin.iOS10;Xamarin.TVOS10;MonoAndroid90;MonoAndroid10.0;tizen40;</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0.16299;</TargetFrameworks>
-    <AssemblyName>XFInAppBilling</AssemblyName>
-    <RootNamespace>Plugin.XFInAppBilling</RootNamespace>
-    <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-    <Version>2.0.4</Version>
-    <Authors>Emil Alipiev</Authors>
-    <PackageId>XFInAppBilling</PackageId>
-    <PackOnBuild>true</PackOnBuild>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Owners>EmilAlipiev</Owners>
-    <PackageProjectUrl>https://github.com/EmilAlipiev/XFInAppBilling</PackageProjectUrl>
-    <Summary>Xamarin and Windows plugin to In-App Billing.</Summary>
-    <PackageTags>InAppBilling, xamarin, xamarin.forms, android, ios, uwp, windows phone, In-App Billing, purchases, plugin, billingclient, storecontext, tizen, amazon iap</PackageTags>
-    <Title>In-App Billing Plugin for Xamarin and Windows</Title>
-    <Description>Xamarin Forms plugin for Android, IOS, TVOS and UWP. Fully cross platform uses latest platform specific in app purchases apis. For Android uses BillingClient, For UWP uses StoreContext and latest IOS in app billing Api.
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;Xamarin.iOS10;Xamarin.TVOS10;MonoAndroid90;MonoAndroid10.0;tizen40;</TargetFrameworks>
+		<TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0.16299;</TargetFrameworks>
+		<AssemblyName>XFInAppBilling</AssemblyName>
+		<RootNamespace>Plugin.XFInAppBilling</RootNamespace>
+		<Product>$(AssemblyName) ($(TargetFramework))</Product>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
+		<Version>2.0.4</Version>
+		<Authors>Emil Alipiev</Authors>
+		<PackageId>XFInAppBilling</PackageId>
+		<PackOnBuild>true</PackOnBuild>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Owners>EmilAlipiev</Owners>
+		<PackageProjectUrl>https://github.com/EmilAlipiev/XFInAppBilling</PackageProjectUrl>
+		<Summary>Xamarin and Windows plugin to In-App Billing.</Summary>
+		<PackageTags>InAppBilling, xamarin, xamarin.forms, android, ios, uwp, windows phone, In-App Billing, purchases, plugin, billingclient, storecontext, tizen, amazon iap</PackageTags>
+		<Title>In-App Billing Plugin for Xamarin and Windows</Title>
+		<Description>
+			Xamarin Forms plugin for Android, IOS, TVOS and UWP. Fully cross platform uses latest platform specific in app purchases apis. For Android uses BillingClient, For UWP uses StoreContext and latest IOS in app billing Api.
 
-      If your project is not using AndoridX and below 4.5 please use Version 1 of this library. Starting from Version 2 XF 4.5 and above is supported. I try to apply same changes on both branches.
-</Description>
-    <Copyright>Copyright 2020</Copyright>
-    <RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBilling</RepositoryUrl>
-    <PackageReleaseNotes>android libraries updated to the latest
-</PackageReleaseNotes>
-    <Icon>https://raw.githubusercontent.com/EmilAlipiev/XFInAppBilling/master/Icons/iaplogo.png?token=ACPQQS7Q36KUNPGWXXT7UTS6GVSOM</Icon>
-    <NeutralLanguage>en</NeutralLanguage>
-    <LangVersion>default</LangVersion>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <LangVersion>8.0</LangVersion>
-    <DefineConstants>DEBUG;TRACE;</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)'=='Release' ">
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <DebugType>portable</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
-    <!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <!-- sourcelink: Embed source files that are not tracked by the source control manager to the PDB -->
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- sourcelink: Include PDB in the built .nupkg -->
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-  </PropertyGroup>
-  <ItemGroup> 
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.11" /> 
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="**\*.shared.cs" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <!--<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />-->
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-  </ItemGroup>
+			If your project is not using AndoridX and below 4.5 please use Version 1 of this library. Starting from Version 2 XF 4.5 and above is supported. I try to apply same changes on both branches.
+		</Description>
+		<Copyright>Copyright 2020</Copyright>
+		<RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBilling</RepositoryUrl>
+		<PackageReleaseNotes>
+			android libraries updated to the latest
+		</PackageReleaseNotes>
+		<Icon>https://raw.githubusercontent.com/EmilAlipiev/XFInAppBilling/master/Icons/iaplogo.png?token=ACPQQS7Q36KUNPGWXXT7UTS6GVSOM</Icon>
+		<NeutralLanguage>en</NeutralLanguage>
+		<LangVersion>default</LangVersion>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<LangVersion>8.0</LangVersion>	 
+		<DefineConstants>$(DefineConstants);</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
+		<DebugType>full</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)'=='Release' ">
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DebugType>portable</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+		<!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<!-- sourcelink: Embed source files that are not tracked by the source control manager to the PDB -->
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<!-- sourcelink: Include PDB in the built .nupkg -->
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="**\*.shared.cs" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<!--<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />-->
+		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
+	</ItemGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-    <Compile Include="**\*.netstandard.cs" />
-  </ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+		<Compile Include="**\*.netstandard.cs" />
+	</ItemGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
-    <Compile Include="**\*.uwp.cs" />
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.9" />
-    <PackageReference Include="Microsoft.Services.Store.SDK" Version="10.1705.16001" />
-  </ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
+		<Compile Include="**\*.uwp.cs" />
 
-  <Target Name="_RemoveNonExistingResgenFile" BeforeTargets="CoreCompile" Condition="'$(_SdkSetAndroidResgenFile)' == 'true' And '$(AndroidResgenFile)' != '' And !Exists('$(AndroidResgenFile)')">
-    <ItemGroup>
-      <Compile Remove="$(AndroidResgenFile)" />
-    </ItemGroup>
-  </Target>
+		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.11" />
+		<PackageReference Include="Microsoft.Services.Store.SDK" Version="10.1705.16001" />
+	</ItemGroup>
 
-  <PropertyGroup>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
+	<Target Name="_RemoveNonExistingResgenFile" BeforeTargets="CoreCompile" Condition="'$(_SdkSetAndroidResgenFile)' == 'true' And '$(AndroidResgenFile)' != '' And !Exists('$(AndroidResgenFile)')">
+		<ItemGroup>
+			<Compile Remove="$(AndroidResgenFile)" />
+		</ItemGroup>
+	</Target>
 
-  <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-    <DesignTimeBuild>false</DesignTimeBuild>
-  </PropertyGroup>
+	<PropertyGroup>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('MonoAndroid')) ">
-    <Compile Include="**\*.android.cs" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
-    <PackageReference Include="Xamarin.Android.Google.BillingClient" Version="3.0.0" />
-  </ItemGroup>
- 
+	<PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+		<DesignTimeBuild>false</DesignTimeBuild>
+	</PropertyGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
-    <Compile Include="**\*.apple.cs" />
-  </ItemGroup>
+	<ItemGroup Condition="$(TargetFramework.StartsWith('MonoAndroid')) ">
+		<Compile Include="**\*.android.cs" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
+		<PackageReference Include="Xamarin.Android.Google.BillingClient" Version="3.0.0" />
+	</ItemGroup>
 
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.TVOS')) ">
-    <Compile Include="**\*.apple.cs" />
-  </ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+		<Compile Include="**\*.apple.cs" />
+	</ItemGroup>
 
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('tizen')) ">
-    <Compile Include="**\*.tizen.cs" />
-    <Compile Include="**\*.tizen.*.cs" />
-  </ItemGroup>
 
-  <PropertyGroup>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.TVOS')) ">
+		<Compile Include="**\*.apple.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('tizen')) ">
+		<Compile Include="**\*.tizen.cs" />
+		<Compile Include="**\*.tizen.*.cs" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
 
 </Project>
