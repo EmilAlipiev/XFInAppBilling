@@ -90,6 +90,8 @@ namespace Plugin.XFInAppBilling
                                         LocalizedPrice = product.Price.FormattedRecurrencePrice,
                                         Description = sku.Description,
                                         Name = product.Title,
+                                        OriginalPrice= product.Price.FormattedBasePrice,
+                                        LocalizedIntroductoryPrice= product.Price.FormattedPrice,
                                         FreeTrialPeriod = sku.SubscriptionInfo.HasTrialPeriod ? sku.SubscriptionInfo.TrialPeriod + " " + sku.SubscriptionInfo.TrialPeriodUnit.ToString() : null
                                     });
                                 }
@@ -99,6 +101,8 @@ namespace Plugin.XFInAppBilling
                                     {
                                         ProductId = product.InAppOfferToken,
                                         LocalizedPrice = product.Price.FormattedPrice,
+                                        OriginalPrice = product.Price.FormattedBasePrice,
+                                        LocalizedIntroductoryPrice = product.Price.FormattedPrice,
                                         Description = sku.Description,
                                         Name = product.Title
                                     });

@@ -7,7 +7,7 @@
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-    <Version>2.0.3-beta</Version>
+    <Version>2.0.3</Version>
     <Authors>Emil Alipiev</Authors>
     <PackageId>XFInAppBilling</PackageId>
     <PackOnBuild>true</PackOnBuild>
@@ -17,20 +17,20 @@
     <Summary>Xamarin and Windows plugin to In-App Billing.</Summary>
     <PackageTags>InAppBilling, xamarin, xamarin.forms, android, ios, uwp, windows phone, In-App Billing, purchases, plugin, billingclient, storecontext, tizen, amazon iap</PackageTags>
     <Title>In-App Billing Plugin for Xamarin and Windows</Title>
-    <Description>Xamarin Forms plugin for Android, IOS, TVOS and UWP. Fully cross platform uses latest platform specific in app purchases apis. For Android uses BillingClient, For UWP uses StoreContext and latest IOS in app billing Api.</Description>
+    <Description>Xamarin Forms plugin for Android, IOS, TVOS and UWP. Fully cross platform uses latest platform specific in app purchases apis. For Android uses BillingClient, For UWP uses StoreContext and latest IOS in app billing Api.
+
+      If your project is not using AndoridX and below 4.5 please use Version 1 of this library. Starting from Version 2 XF 4.5 and above is supported. I try to apply same changes on both branches.
+</Description>
     <Copyright>Copyright 2020</Copyright>
     <RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBilling</RepositoryUrl>
-    <PackageReleaseNotes>
-      CurrentActivityPlugin replaced with Xamarin.Essentials
-      AndroidX support added using XF 4.5 and BillingClient 3.0
-      If your project is not using AndoridX and below 4.5 please use Version 1 of this library. Starting from Version 2 XF 4.5 and above is supported. I try to apply same changes on both branches.
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>android libraries updated to the latest
+</PackageReleaseNotes>
     <Icon>https://raw.githubusercontent.com/EmilAlipiev/XFInAppBilling/master/Icons/iaplogo.png?token=ACPQQS7Q36KUNPGWXXT7UTS6GVSOM</Icon>
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <LangVersion>8.0</LangVersion>
-    <DefineConstants>$(DefineConstants);</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
     <DebugType>full</DebugType>
@@ -50,6 +50,7 @@
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   <ItemGroup> 
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.11" /> 
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
