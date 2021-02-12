@@ -82,11 +82,20 @@
         public string FreeTrialPeriod { get; set; }
         /// <summary>
         /// Returns formatted original price of the item, including its currency sign.
+        /// if there is a sale this is non-sale price
         /// </summary>
         public string OriginalPrice { get; set; }
         /// <summary>
         /// Returns the original price in micro-units, where 1,000,000 micro-units equal one unit of the currency.
         /// </summary>
         public long OriginalPriceAmountMicros { get; set; }
+        /// <summary>
+        /// If there is an active sales
+        /// </summary>
+        public bool IsOnSale { get; set; }
+        /// <summary>
+        /// Sale end time
+        /// </summary>
+        public System.DateTimeOffset SaleEndDate { get; set; } 
     }
 }

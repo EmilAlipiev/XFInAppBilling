@@ -92,6 +92,8 @@ namespace Plugin.XFInAppBilling
                                         Name = product.Title,
                                         OriginalPrice= product.Price.FormattedBasePrice,
                                         LocalizedIntroductoryPrice= product.Price.FormattedPrice,
+                                        SaleEndDate = product.Price.SaleEndDate,
+                                        IsOnSale = product.Price.IsOnSale,
                                         FreeTrialPeriod = sku.SubscriptionInfo.HasTrialPeriod ? sku.SubscriptionInfo.TrialPeriod + " " + sku.SubscriptionInfo.TrialPeriodUnit.ToString() : null
                                     });
                                 }
@@ -104,7 +106,9 @@ namespace Plugin.XFInAppBilling
                                         OriginalPrice = product.Price.FormattedBasePrice,
                                         LocalizedIntroductoryPrice = product.Price.FormattedPrice,
                                         Description = sku.Description,
-                                        Name = product.Title
+                                        Name = product.Title,
+                                        SaleEndDate= product.Price.SaleEndDate,
+                                        IsOnSale= product.Price.IsOnSale
                                     });
                                 }
 
