@@ -404,7 +404,7 @@ namespace Plugin.XFInAppBilling
 
             if (billingResult.ResponseCode == BillingResponseCode.Ok && purchases != null)
             {
-                purchaseResult.PurchaseState = Plugin.XFInAppBilling.PurchaseState.Purchased;
+                purchaseResult.PurchaseState = PurchaseState.Purchased;
                 if (purchases?.Count > 0)
                 {
                     var purchaseResults = await GetPurchasesAsync(purchases);
@@ -413,18 +413,16 @@ namespace Plugin.XFInAppBilling
             }
             else if (billingResult.ResponseCode == BillingResponseCode.UserCancelled)
             {
-                purchaseResult.PurchaseState = Plugin.XFInAppBilling.PurchaseState.Cancelled;
+                purchaseResult.PurchaseState = PurchaseState.Cancelled;
             }
             else if (billingResult.ResponseCode == BillingResponseCode.ItemAlreadyOwned)
             {
-                purchaseResult.PurchaseState = Plugin.XFInAppBilling.PurchaseState.AlreadyOwned;
+                purchaseResult.PurchaseState = PurchaseState.AlreadyOwned;
             }
             else
             {
-                purchaseResult.PurchaseState = Plugin.XFInAppBilling.PurchaseState.Failed;
+                purchaseResult.PurchaseState = PurchaseState.Failed;
             }
-
-
 
             return purchaseResult;
         }
@@ -454,20 +452,20 @@ namespace Plugin.XFInAppBilling
                     switch (purchase.PurchaseState)
                     {
                         case Android.BillingClient.Api.PurchaseState.Pending:
-                            purchaseState = Plugin.XFInAppBilling.PurchaseState.Pending;
+                            purchaseState = PurchaseState.Pending;
                             break;
                         case Android.BillingClient.Api.PurchaseState.Purchased:
                             // Acknowledge the purchase if it hasn't already been acknowledged.
                             if (await NotifyFullFillmentAsync(purchase))
-                                purchaseState = Plugin.XFInAppBilling.PurchaseState.Purchased;
+                                purchaseState = PurchaseState.Purchased;
                             else
-                                purchaseState = Plugin.XFInAppBilling.PurchaseState.NotAknowledged;
+                                purchaseState = PurchaseState.NotAknowledged;
                             break;
                         case Android.BillingClient.Api.PurchaseState.Unspecified:
-                            purchaseState = Plugin.XFInAppBilling.PurchaseState.Unspecified;
+                            purchaseState = PurchaseState.Unspecified;
                             break;
                         default:
-                            purchaseState = Plugin.XFInAppBilling.PurchaseState.Unspecified;
+                            purchaseState = PurchaseState.Unspecified;
                             break;
                     }
                     purchaseResult.Sku = purchase.Sku;
