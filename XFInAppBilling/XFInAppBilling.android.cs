@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Android.App;
 using Android.BillingClient.Api;
 using Android.Content;
@@ -13,7 +14,7 @@ namespace Plugin.XFInAppBilling
     /// Android Implementation
     /// </summary>
     [Preserve(AllMembers = true)]
-    public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener
+    public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener, IPurchasesResponseListener, IConnectionState
     {
         private bool _isServiceConnected;
 
@@ -34,7 +35,7 @@ namespace Plugin.XFInAppBilling
 
         TaskCompletionSource<bool> _tcsConnect;
         TaskCompletionSource<PurchaseResult> _tcsPurchase;
-
+        TaskCompletionSource<List<PurchaseResult>> _tcsPurchases;
         TaskCompletionSource<bool> _tcsAcknowledge;
 
 
@@ -51,7 +52,7 @@ namespace Plugin.XFInAppBilling
             BillingClient = BillingClient.NewBuilder(CurrentContext).EnablePendingPurchases().SetListener(this).Build();
 
             BillingClient.StartConnection(this);
-
+       
             return await _tcsConnect?.Task;
         }
 
@@ -112,7 +113,6 @@ namespace Plugin.XFInAppBilling
                 await ConnectAsync();
             }
 
-
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
             var response = await BillingClient.QueryPurchaseHistoryAsync(type);
 
@@ -134,11 +134,8 @@ namespace Plugin.XFInAppBilling
 
             var prms = SkuDetailsParams.NewBuilder();
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
-            var purchaseResult = BillingClient.QueryPurchases(type);
-            var purchases = await GetPurchasesAsync(purchaseResult.PurchasesList);
-
-            return purchases;
-
+            BillingClient.QueryPurchasesAsync(type, this);
+            return await _tcsPurchases?.Task ?? default;
         }
 
         /// <summary>
@@ -320,10 +317,10 @@ namespace Plugin.XFInAppBilling
                     {
                         var purchaseHistory = new PurchaseResult
                         {
-                            Sku = purchase.Sku,
+                            Sku = purchase.Skus[0],
+                            Skus = purchase.Skus,
                             PurchaseToken = purchase.PurchaseToken
                         };
-
 
                         if (purchase.PurchaseTime > 0)
                             purchaseHistory.PurchaseDate = DateTimeOffset.FromUnixTimeMilliseconds(purchase.PurchaseTime).DateTime;
@@ -448,7 +445,7 @@ namespace Plugin.XFInAppBilling
                 foreach (var purchase in purchases)
                 {
                     var purchaseResult = new PurchaseResult();
-                    Plugin.XFInAppBilling.PurchaseState purchaseState;
+                    PurchaseState purchaseState;
                     switch (purchase.PurchaseState)
                     {
                         case Android.BillingClient.Api.PurchaseState.Pending:
@@ -468,7 +465,9 @@ namespace Plugin.XFInAppBilling
                             purchaseState = PurchaseState.Unspecified;
                             break;
                     }
-                    purchaseResult.Sku = purchase.Sku;
+                    purchaseResult.Sku = purchase.Skus[0];
+                    purchaseResult.Skus = purchase.Skus;
+                    purchaseResult.Quantity = purchase.Quantity;
                     purchaseResult.PurchaseToken = purchase.PurchaseToken;
                     purchaseResult.PurchaseState = purchaseState;
                     if (purchase.PurchaseTime > 0)
@@ -583,7 +582,13 @@ namespace Plugin.XFInAppBilling
             }
         }
 
-        public async Task<PurchaseResult> OnConsumeResponse(BillingResult billingResult, String purchaseToken)
+        /// <summary>
+        /// The listener for the result of the Consume returned asynchronously through the callback with the BillingResult and purchase token.
+        /// </summary>
+        /// <param name="billingResult"></param>
+        /// <param name="purchaseToken"></param>
+        /// <returns></returns>
+        public async Task<PurchaseResult> OnConsumeResponse(BillingResult billingResult, string purchaseToken)
         {
             CheckResultNotNull(billingResult);
 
@@ -597,6 +602,25 @@ namespace Plugin.XFInAppBilling
             else
             {
                 return purchaseResult;
+            }
+        }
+
+        /// <summary>
+        /// The listener for the result of the query returned asynchronously through the callback with the BillingResult and the list of Purchase.
+        /// </summary>
+        /// <param name="billingResult"></param>
+        /// <param name="purchases"></param>
+        public async void OnQueryPurchasesResponse(BillingResult billingResult, IList<Purchase> purchases)
+        {
+            var errorCode = GetErrorCode(billingResult.ResponseCode);
+            if (errorCode != null) //No error
+            {
+                throw errorCode;
+            }
+            else
+            {
+                var result = await GetPurchasesAsync(purchases);
+                _tcsPurchases.SetResult(result);
             }
         }
 
@@ -619,36 +643,22 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         private InAppBillingPurchaseException GetErrorCode(BillingResponseCode billingResponseCode)
         {
-            switch (billingResponseCode)
+            return billingResponseCode switch
             {
-                case BillingResponseCode.Ok:
-                    return null;
-                case BillingResponseCode.BillingUnavailable:
-                    return new InAppBillingPurchaseException(PurchaseError.BillingUnavailable);
-                case BillingResponseCode.DeveloperError:
-                    return new InAppBillingPurchaseException(PurchaseError.DeveloperError);
-                case BillingResponseCode.Error:
-                    return new InAppBillingPurchaseException(PurchaseError.GeneralError);
-                case BillingResponseCode.FeatureNotSupported:
-                    return new InAppBillingPurchaseException(PurchaseError.FeatureNotSupported);
-                case BillingResponseCode.ItemAlreadyOwned:
-                    return null;
-                case BillingResponseCode.ItemNotOwned:
-                    return new InAppBillingPurchaseException(PurchaseError.NotOwned);
-                case BillingResponseCode.ItemUnavailable:
-                    return new InAppBillingPurchaseException(PurchaseError.ItemUnavailable);
-                case BillingResponseCode.ServiceDisconnected:
-                    return new InAppBillingPurchaseException(PurchaseError.ServiceDisconnected);
-                case BillingResponseCode.ServiceTimeout:
-                    return new InAppBillingPurchaseException(PurchaseError.ServiceTimeout);
-                case BillingResponseCode.ServiceUnavailable:
-                    return new InAppBillingPurchaseException(PurchaseError.ServiceUnavailable);
-                case BillingResponseCode.UserCancelled:
-                    return new InAppBillingPurchaseException(PurchaseError.UserCancelled);
-                default:
-                    return new InAppBillingPurchaseException(PurchaseError.GeneralError);
-
-            }
+                BillingResponseCode.Ok => null,
+                BillingResponseCode.BillingUnavailable => new InAppBillingPurchaseException(PurchaseError.BillingUnavailable),
+                BillingResponseCode.DeveloperError => new InAppBillingPurchaseException(PurchaseError.DeveloperError),
+                BillingResponseCode.Error => new InAppBillingPurchaseException(PurchaseError.GeneralError),
+                BillingResponseCode.FeatureNotSupported => new InAppBillingPurchaseException(PurchaseError.FeatureNotSupported),
+                BillingResponseCode.ItemAlreadyOwned => null,
+                BillingResponseCode.ItemNotOwned => new InAppBillingPurchaseException(PurchaseError.NotOwned),
+                BillingResponseCode.ItemUnavailable => new InAppBillingPurchaseException(PurchaseError.ItemUnavailable),
+                BillingResponseCode.ServiceDisconnected => new InAppBillingPurchaseException(PurchaseError.ServiceDisconnected),
+                BillingResponseCode.ServiceTimeout => new InAppBillingPurchaseException(PurchaseError.ServiceTimeout),
+                BillingResponseCode.ServiceUnavailable => new InAppBillingPurchaseException(PurchaseError.ServiceUnavailable),
+                BillingResponseCode.UserCancelled => new InAppBillingPurchaseException(PurchaseError.UserCancelled),
+                _ => new InAppBillingPurchaseException(PurchaseError.GeneralError),
+            };
         }
 
         #region NOTUSED FOR ANDROID
