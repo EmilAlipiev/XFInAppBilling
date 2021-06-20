@@ -14,7 +14,7 @@ namespace Plugin.XFInAppBilling
     /// Android Implementation
     /// </summary>
     [Preserve(AllMembers = true)]
-    public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener, IPurchasesResponseListener, IConnectionState
+    public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener, IPurchasesResponseListener 
     {
         private bool _isServiceConnected;
 
