@@ -18,7 +18,14 @@ namespace Plugin.XFInAppBilling
         {
                 
         }
-        public string Sku { get; set; }    
+        /// <summary>
+        /// Sku of Purchased Item
+        /// </summary>
+        public string Sku { get; set; }
+        /// <summary>
+        /// Skus of Purchased Items. if multiple skus are purchased with 1 billing request. For subscriptions always 1
+        /// </summary>
+        public IList<string> Skus { get; set; }
         public string PurchaseToken { get; set; }
         public string OrderId { get; set; }
         public bool IsAutoRenewing { get; set; }
@@ -34,7 +41,12 @@ namespace Plugin.XFInAppBilling
         /// Gets the current consumption state
         /// </summary>
         public ConsumptionState ConsumptionState { get; set; }
- 
+        /// <summary>
+        /// Returns the quantity of the purchased product
+        /// Android:Always returns 1 for BillingClient.SkuType.SUBS items; could be greater than 1 for BillingClient.SkuType.INAPP items.
+        /// </summary>
+        public int Quantity { get;  set; }
+
         public static bool operator ==(PurchaseResult left, PurchaseResult right) =>
             Equals(left, right);
 
