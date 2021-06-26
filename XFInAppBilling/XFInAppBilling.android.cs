@@ -243,6 +243,9 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         private async Task<bool> NotifyFullFillmentAsync(Purchase purchase)
         {
+            if (purchase == null)
+                return false;
+
             if (!purchase.IsAcknowledged)
             {
                 if (BillingClient == null || !BillingClient.IsReady)
