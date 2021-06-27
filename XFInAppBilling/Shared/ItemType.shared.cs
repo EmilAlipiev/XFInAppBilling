@@ -1,6 +1,5 @@
 ﻿namespace Plugin.XFInAppBilling
 {
-
     /// <summary>
     /// Product item type
     /// </summary>

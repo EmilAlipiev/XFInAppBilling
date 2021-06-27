@@ -486,6 +486,11 @@ namespace Plugin.XFInAppBilling
             }
         }
 
+        public Task<PurchaseResult> UpdateSubscriptionAsync(string oldSubscriptionToken, string newSubscriptionId, Proration proration)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

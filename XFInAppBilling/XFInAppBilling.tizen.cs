@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Plugin.XFInAppBilling
 {
     /// <summary>
-    /// UWP implementation
+    /// Tizen implementation
     /// </summary>
     public class XFInAppBillingImplementation : IXFInAppBilling
     {
@@ -66,6 +66,11 @@ namespace Plugin.XFInAppBilling
         }
 
         public Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PurchaseResult> UpdateSubscriptionAsync(string oldSubscriptionToken, string newSubscriptionId, Proration proration)
         {
             throw new NotImplementedException();
         }
