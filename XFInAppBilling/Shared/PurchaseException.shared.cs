@@ -93,19 +93,11 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="error"></param>
         /// <param name="ex"></param>
-        public InAppBillingPurchaseException(PurchaseError error, Exception ex) : base("Unable to process purchase.", ex)
+        public InAppBillingPurchaseException(PurchaseError error, Exception ex, string message) : base(message, ex)
         {
             PurchaseError = error;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="error"></param>
-        public InAppBillingPurchaseException(PurchaseError error) : base("Unable to process purchase.")
-        {
-            PurchaseError = error;
-        }
-
+       
         /// <summary>
         /// 
         /// </summary>
