@@ -67,7 +67,7 @@ namespace Plugin.XFInAppBilling
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
-            }
+            }      
 
             var prms = SkuDetailsParams.NewBuilder();
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
@@ -128,8 +128,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="verifyPurchase"></param>
         /// <returns></returns>
         public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, IInAppBillingVerifyPurchase? verifyPurchase = null, string? verifyOnlyProductId = null)
-        {
-            List<PurchaseResult> purchases = new List<PurchaseResult>();
+        {     
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
@@ -269,6 +268,8 @@ namespace Plugin.XFInAppBilling
             return true;
         }
 
+        #endregion
+
         /// <summary>
         /// Completes Consume purchase with Api request
         /// </summary>
@@ -276,7 +277,6 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         private async Task<PurchaseResult> CompleteConsume(string purchaseToken)
         {
-
             var consumeParams = ConsumeParams.NewBuilder().SetPurchaseToken(purchaseToken);
 
             var response = await BillingClient?.ConsumeAsync(consumeParams.Build());
@@ -285,8 +285,6 @@ namespace Plugin.XFInAppBilling
 
             return await OnConsumeResponse(response.BillingResult, response.PurchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
         }
-
-        #endregion
 
         /// <summary>
         /// Completes the Purchase
@@ -409,7 +407,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="billingResult"></param>
         /// <param name="purchases"></param>
         /// <returns></returns>
-        private async Task<PurchaseResult?> GetPurchaseResult(BillingResult billingResult, IList<Purchase>? purchases)
+        private async Task<PurchaseResult> GetPurchaseResult(BillingResult billingResult, IList<Purchase>? purchases)
         {
             var purchaseResult = new PurchaseResult();
 
@@ -437,7 +435,7 @@ namespace Plugin.XFInAppBilling
                 purchaseResult.PurchaseState = PurchaseState.Failed;
             }
 
-            return purchaseResult;
+            return purchaseResult ?? new PurchaseResult() { PurchaseState = PurchaseState.Failed };
         }
 
         private static void CheckResultNotNull(BillingResult billingResult)
@@ -496,11 +494,9 @@ namespace Plugin.XFInAppBilling
 
                     purchaseResults.Add(purchaseResult);
                 }
-
             }
 
             return purchaseResults;
-
         }
 
         /// <summary>
