@@ -38,6 +38,7 @@
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<LangVersion>8.0</LangVersion>	 
 		<DefineConstants>$(DefineConstants);</DefineConstants>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
 		<DebugType>full</DebugType>
