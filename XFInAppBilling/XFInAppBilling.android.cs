@@ -137,8 +137,8 @@ namespace Plugin.XFInAppBilling
 
             var prms = SkuDetailsParams.NewBuilder();
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
-            BillingClient.QueryPurchasesAsync(type, this);
-            return await _tcsPurchases?.Task ?? default;
+            BillingClient?.QueryPurchasesAsync(type, this);
+            return await _tcsPurchases.Task;
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace Plugin.XFInAppBilling
                 throw new Exception("Unable to find a purchase with matching product id and payload");
             }
 
-            return await CompleteConsume(purchase.PurchaseToken);
+            return await CompleteConsume(purchase.PurchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
         }
 
         /// <summary>
@@ -280,10 +280,10 @@ namespace Plugin.XFInAppBilling
             var consumeParams = ConsumeParams.NewBuilder().SetPurchaseToken(purchaseToken);
 
             var response = await BillingClient?.ConsumeAsync(consumeParams.Build());
-            if(response is null)
+            if (response is null)
                 throw new Exception("An error occured");
 
-            return await OnConsumeResponse(response.BillingResult, response.PurchaseToken);
+            return await OnConsumeResponse(response.BillingResult, response.PurchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
         }
 
         #endregion
@@ -303,7 +303,7 @@ namespace Plugin.XFInAppBilling
 
             BillingFlowParams flowParams = BillingFlowParams.NewBuilder().SetSkuDetails(product).Build();
             BillingClient?.LaunchBillingFlow(Activity, flowParams);
-            return await _tcsPurchase.Task ?? default;
+            return await _tcsPurchase.Task;
         }
 
         #region ResponseHandlers
@@ -344,8 +344,10 @@ namespace Plugin.XFInAppBilling
             else
             {
                 var errorCode = GetErrorCode(billingResult);
+                if (errorCode != null)
+                    throw errorCode;
 
-                throw errorCode;
+                return PurchaseHistoryResult;
             }
         }
 
@@ -384,11 +386,11 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="billingResult"></param>
         /// <param name="purchases"></param>
-        public async void OnPurchasesUpdated(BillingResult billingResult, IList<Purchase> purchases)
+        public async void OnPurchasesUpdated(BillingResult billingResult, IList<Purchase>? purchases)
         {
             CheckResultNotNull(billingResult);
 
-            PurchaseResult purchaseResult = await GetPurchaseResult(billingResult, purchases);
+            var purchaseResult = await GetPurchaseResult(billingResult, purchases);
 
             var errorCode = GetErrorCode(billingResult);
             if (errorCode != null) //No error
@@ -397,9 +399,8 @@ namespace Plugin.XFInAppBilling
             }
             else
             {
-                _tcsPurchase?.TrySetResult(purchaseResult);
+                _tcsPurchase?.TrySetResult(purchaseResult ?? new PurchaseResult() { PurchaseState = PurchaseState.Failed });
             }
-
         }
 
         /// <summary>
@@ -408,7 +409,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="billingResult"></param>
         /// <param name="purchases"></param>
         /// <returns></returns>
-        private async Task<PurchaseResult> GetPurchaseResult(BillingResult billingResult, IList<Purchase> purchases)
+        private async Task<PurchaseResult?> GetPurchaseResult(BillingResult billingResult, IList<Purchase>? purchases)
         {
             var purchaseResult = new PurchaseResult();
 
@@ -603,11 +604,11 @@ namespace Plugin.XFInAppBilling
         /// <param name="billingResult"></param>
         /// <param name="purchaseToken"></param>
         /// <returns></returns>
-        public async Task<PurchaseResult> OnConsumeResponse(BillingResult billingResult, string purchaseToken)
+        public async Task<PurchaseResult?> OnConsumeResponse(BillingResult billingResult, string purchaseToken)
         {
             CheckResultNotNull(billingResult);
 
-            PurchaseResult purchaseResult = await GetPurchaseResult(billingResult, null);
+            var purchaseResult = await GetPurchaseResult(billingResult, null);
 
             var errorCode = GetErrorCode(billingResult);
             if (errorCode != null) //No error
@@ -657,10 +658,11 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="billingResponseCode"></param>
         /// <returns></returns>
-        private InAppBillingPurchaseException GetErrorCode(BillingResult billingResult)
+        private InAppBillingPurchaseException? GetErrorCode(BillingResult billingResult)
         {
             BillingResponseCode billingResponseCode = billingResult.ResponseCode;
             string message = billingResult.DebugMessage ?? "";
+
             return billingResponseCode switch
             {
                 BillingResponseCode.Ok => null,
