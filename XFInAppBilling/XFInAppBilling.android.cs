@@ -128,7 +128,8 @@ namespace Plugin.XFInAppBilling
         /// <param name="verifyPurchase"></param>
         /// <returns></returns>
         public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, IInAppBillingVerifyPurchase? verifyPurchase = null, string? verifyOnlyProductId = null)
-        {     
+        {
+            List<PurchaseResult> purchases = new List<PurchaseResult>();
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
@@ -136,8 +137,18 @@ namespace Plugin.XFInAppBilling
 
             var prms = SkuDetailsParams.NewBuilder();
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
-            BillingClient?.QueryPurchasesAsync(type, this);
-            return await _tcsPurchases.Task;
+           // BillingClient?.QueryPurchasesAsync(type, this);
+
+            var purchaseResult = BillingClient?.QueryPurchases(type);
+            if (purchaseResult?.PurchasesList.Count > 0)
+            {
+                 purchases = await GetPurchasesAsync(purchaseResult.PurchasesList);
+                return purchases;
+            }
+
+            return purchases;
+
+           // return await _tcsPurchases.Task;
         }
 
         /// <summary>

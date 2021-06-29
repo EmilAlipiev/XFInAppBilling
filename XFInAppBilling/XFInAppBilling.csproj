@@ -7,7 +7,7 @@
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-		<Version>4.0.3</Version>
+		<Version>4.0.4-beta</Version>
 		<Authors>Emil Alipiev</Authors>
 		<PackageId>XFInAppBilling</PackageId>
 		<PackOnBuild>true</PackOnBuild>
@@ -25,6 +25,7 @@
 		<PackageReleaseNotes>
 			Android Billing library update to 4.0
 			https://developer.android.com/google/play/billing/release-notes#4-0
+			QueryPurchasesAsync restored back to QueryPurchases beacuse of Service connection is disconnecte error
 		</PackageReleaseNotes>
 		<Copyright>Copyright 2020</Copyright>
 		<RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBilling</RepositoryUrl>
