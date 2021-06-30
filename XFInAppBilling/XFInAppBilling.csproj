@@ -7,7 +7,7 @@
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-		<Version>4.0.4-beta</Version>
+		<Version>4.0.5</Version>
 		<Authors>Emil Alipiev</Authors>
 		<PackageId>XFInAppBilling</PackageId>
 		<PackOnBuild>true</PackOnBuild>

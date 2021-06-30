@@ -67,7 +67,7 @@ namespace Plugin.XFInAppBilling
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
-            }      
+            }
 
             var prms = SkuDetailsParams.NewBuilder();
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
@@ -129,6 +129,7 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, IInAppBillingVerifyPurchase? verifyPurchase = null, string? verifyOnlyProductId = null)
         {
+           // _tcsPurchases = new TaskCompletionSource<List<PurchaseResult>>();
             List<PurchaseResult> purchases = new List<PurchaseResult>();
             if (BillingClient == null || !BillingClient.IsReady)
             {
@@ -142,13 +143,13 @@ namespace Plugin.XFInAppBilling
             var purchaseResult = BillingClient?.QueryPurchases(type);
             if (purchaseResult?.PurchasesList.Count > 0)
             {
-                 purchases = await GetPurchasesAsync(purchaseResult.PurchasesList);
+                purchases = await GetPurchasesAsync(purchaseResult.PurchasesList);
                 return purchases;
             }
 
             return purchases;
 
-           // return await _tcsPurchases.Task;
+            //return await _tcsPurchases.Task;
         }
 
         /// <summary>
@@ -635,16 +636,16 @@ namespace Plugin.XFInAppBilling
         /// <param name="purchases"></param>
         public async void OnQueryPurchasesResponse(BillingResult billingResult, IList<Purchase> purchases)
         {
+            _tcsPurchases = new TaskCompletionSource<List<PurchaseResult>>();
             var errorCode = GetErrorCode(billingResult);
             if (errorCode != null) //No error
             {
-                throw errorCode;
+                _tcsPurchases?.TrySetException(errorCode);
             }
             else
-            {
-                _tcsPurchases = new TaskCompletionSource<List<PurchaseResult>>();
+            {       
                 var result = await GetPurchasesAsync(purchases);
-                _tcsPurchases.SetResult(result);
+                _tcsPurchases.TrySetResult(result);
             }
         }
 
