@@ -3,7 +3,7 @@ name: Nuget Package Deploy
 on: 
  push:
    branches: 
-     - Billing221updateAndroidX
+     - Issue12_AndroidSubUpgradeDowngrade
 jobs:
   build:
     runs-on: windows-latest

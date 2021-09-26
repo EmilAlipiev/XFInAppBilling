@@ -52,6 +52,14 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         Task<List<PurchaseResult>> GetPurchaseHistoryAsync(ItemType itemType = ItemType.InAppPurchase);
         /// <summary>
+        /// Allow users to upgrade, downgrade, or change their subscription
+        /// </summary>
+        /// <param name="oldSubscriptionToken">Token for upgraded existing Subscription</param>
+        /// <param name="newSubscriptionId">InAppPurchase Id of new Subscription</param>
+        /// <param name="proration">Proration</param>
+        /// <returns></returns>
+        Task<PurchaseResult> UpdateSubscriptionAsync(string oldSubscriptionToken, string newSubscriptionId, Proration proration);
+        /// <summary>
         /// Initiate Store or Native Api. Pre-checks IAP availability as well.
         /// </summary>
         /// <returns></returns>

@@ -25,7 +25,8 @@
 		<PackageReleaseNotes>
 			Android Billing library update to 4.0
 			https://developer.android.com/google/play/billing/release-notes#4-0
-		    null checks for Android
+			
+			-Subscription Update for Android added. Dowgrade, Upgrade subscriptions
 		</PackageReleaseNotes>
 		<Copyright>Copyright 2020</Copyright>
 		<RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBilling</RepositoryUrl>
@@ -116,5 +117,9 @@
 	<PropertyGroup>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Shared\Proration.shared.cs" />
+	</ItemGroup>
 
 </Project>

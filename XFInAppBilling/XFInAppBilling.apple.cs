@@ -423,6 +423,11 @@ namespace Plugin.XFInAppBilling
         {
             throw new NotImplementedException();
         }
+
+        public Task<PurchaseResult> UpdateSubscriptionAsync(string oldSubscriptionToken, string newSubscriptionId, Proration proration)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 

@@ -38,6 +38,10 @@ namespace Plugin.XFInAppBilling
         TaskCompletionSource<List<PurchaseResult>> _tcsPurchases;
         TaskCompletionSource<bool> _tcsAcknowledge;
 
+        /// <summary>
+        /// temporarily holds the product to purchase
+        /// </summary>
+        private SkuDetails ProductToPurcase { get; set; }
 
         #region API Functions
 
@@ -140,7 +144,6 @@ namespace Plugin.XFInAppBilling
                 await ConnectAsync();
             }
 
-            var prms = SkuDetailsParams.NewBuilder();
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
             // BillingClient?.QueryPurchasesAsync(type, this);
 
@@ -171,22 +174,12 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
         {
-            PurchaseResult purchaseResult;
             var productIds = new List<string> { productId };
 
-            await GetProductsAsync(productIds, itemType);
-
-            if (ProductToPurcase != null)
-            {
-                purchaseResult = await DoPurchaseAsync(ProductToPurcase);
-            }
-            else
-            {
-                throw new Exception("Purchase Product not found");
-            }
+            await GetSkuDetails(itemType, productIds);
+            var purchaseResult = await DoPurchaseAsync(ProductToPurcase);
 
             return purchaseResult;
-
         }
 
         /// <summary>
@@ -237,6 +230,65 @@ namespace Plugin.XFInAppBilling
             }
 
             return await CompleteConsume(purchase.PurchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
+        }
+
+        /// <summary>
+        /// Allow users to upgrade, downgrade, or change their subscription
+        /// </summary>
+        /// <param name="oldSubscriptionToken">Token for upgraded existing Subscription</param>
+        /// <param name="newSubscriptionId">InAppPurchase Id of new Subscription</param>
+        /// <param name="proration">Proration</param>
+        /// <returns></returns>
+        public async Task<PurchaseResult> UpdateSubscriptionAsync(string oldSubscriptionToken, string newSubscriptionId, Proration proration)
+        {             
+            if (BillingClient == null || !BillingClient.IsReady)
+            {
+                await ConnectAsync();
+            }
+            int desiredProration = GetProrationMode(proration);
+
+            _tcsPurchase = new TaskCompletionSource<PurchaseResult>();
+
+            ///gets the Sku details for the new subscription from the API
+            await GetSkuDetails(ItemType.Subscription, new List<string> { newSubscriptionId });
+
+            if (ProductToPurcase == null)
+            {
+                throw new Exception("Purchase Product not found");
+            }            
+
+            ///Starts the UpdateFlow
+            var prms = BillingFlowParams.SubscriptionUpdateParams.NewBuilder().SetOldSkuPurchaseToken(oldSubscriptionToken).SetReplaceSkusProrationMode(desiredProration);
+
+            BillingFlowParams flowParams = BillingFlowParams.NewBuilder().SetSubscriptionUpdateParams(prms.Build()).SetSkuDetails(ProductToPurcase).Build();
+
+            BillingResult responseCode = BillingClient.LaunchBillingFlow(Activity, flowParams);
+
+            return await _tcsPurchase?.Task ?? default; 
+        }
+
+        /// <summary>
+        /// Return Subscription Update ProrationMode
+        /// </summary>
+        /// <param name="proration"></param>
+        /// <returns></returns>
+        private int GetProrationMode(Proration proration)
+        {
+            switch (proration)
+            {
+                case Proration.ImmediateWithTimeProration:
+                    return BillingFlowParams.ProrationMode.ImmediateWithTimeProration;
+                case Proration.ImmediateAndChargeProratedPrice:
+                    return BillingFlowParams.ProrationMode.ImmediateAndChargeProratedPrice;
+                case Proration.ImmediateWithoutProration:
+                    return BillingFlowParams.ProrationMode.ImmediateWithoutProration;
+                case Proration.Deferred:
+                    return BillingFlowParams.ProrationMode.Deferred;
+                case Proration.ImmediateAndChargeFullPrice:
+                    return BillingFlowParams.ProrationMode.ImmediateAndChargeFullPrice;
+                default:
+                    return BillingFlowParams.ProrationMode.ImmediateWithTimeProration;
+            } 
         }
 
         /// <summary>
@@ -320,6 +372,26 @@ namespace Plugin.XFInAppBilling
             return await _tcsPurchase.Task;
         }
 
+        /// <summary>
+        /// Returns product or subs to purchase as SkudDetails
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <param name="purchaseResult"></param>
+        /// <param name="productIds"></param>
+        /// <returns></returns>
+        private async Task<SkuDetails> GetSkuDetails(ItemType itemType, List<string> productIds)
+        {
+            await GetProductsAsync(productIds, itemType);
+
+            if (ProductToPurcase == null)
+            {
+                throw new Exception("Purchase Product not found");
+            }
+
+            return ProductToPurcase;
+        }
+
+
         #region ResponseHandlers
 
         /// <summary>
@@ -397,12 +469,15 @@ namespace Plugin.XFInAppBilling
         /// Purchase Handler - PurchasesUpdatedListener
         /// Listener interface for purchase updates which happen when, 
         /// for example, the user buys something within the app or by initiating a purchase from Google Play Store.
+        /// Called also on Subscription updates like upgrade, downgrade etc.
         /// </summary>
         /// <param name="billingResult"></param>
         /// <param name="purchases"></param>
         public async void OnPurchasesUpdated(BillingResult billingResult, IList<Purchase>? purchases)
         {
-            CheckResultNotNull(billingResult);
+            if(purchases?.Count> 0) //empty if purchase is deferred after a purchase process. GetPurchasesAsync should be called to get the status if deferred
+            {
+                CheckResultNotNull(billingResult);
 
             var purchaseResult = await GetPurchaseResult(billingResult, purchases);
 
@@ -434,7 +509,7 @@ namespace Plugin.XFInAppBilling
                 purchaseResult.PurchaseState = PurchaseState.Purchased;
                 if (purchases?.Count > 0)
                 {
-                    var purchaseResults = await GetPurchasesAsync(purchases);
+                    var purchaseResults = await GetPurchaseResults(purchases);
                     purchaseResult = purchaseResults?.OrderByDescending(p => p.ExpirationDate).Last();
                 }
             }
@@ -463,11 +538,11 @@ namespace Plugin.XFInAppBilling
         }
 
         /// <summary>
-        /// GetPurchases handler
+        /// Get PurchaseResults from a list of BillingClient Purchases
         /// </summary>
         /// <param name="purchases"></param>
         /// <returns></returns>
-        private async Task<List<PurchaseResult>> GetPurchasesAsync(IList<Purchase> purchases)
+        private async Task<List<PurchaseResult>> GetPurchaseResults(IList<Purchase> purchases)
         {
             var purchaseResults = new List<PurchaseResult>();
             if (purchases?.Count > 0)
