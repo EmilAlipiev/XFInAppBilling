@@ -38,10 +38,7 @@ namespace Plugin.XFInAppBilling
         TaskCompletionSource<List<PurchaseResult>> _tcsPurchases;
         TaskCompletionSource<bool> _tcsAcknowledge;
 
-        /// <summary>
-        /// temporarily holds the product to purchase
-        /// </summary>
-        private SkuDetails ProductToPurcase { get; set; }
+
 
         #region API Functions
 
@@ -84,6 +81,25 @@ namespace Plugin.XFInAppBilling
             var result = await BillingClient.QuerySkuDetailsAsync(skuDetailsParams);
 
             return OnSkuDetailsResponse(result);
+        }
+
+        /// <summary>
+        /// Returns product or subs to purchase as SkudDetails
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <param name="purchaseResult"></param>
+        /// <param name="productIds"></param>
+        /// <returns></returns>
+        private async Task<SkuDetails> GetSkuDetails(ItemType itemType, List<string> productIds)
+        {
+            await GetProductsAsync(productIds, itemType);
+
+            if (ProductToPurchase == null)
+            {
+                throw new Exception("Purchase Product not found");
+            }
+
+            return ProductToPurchase;
         }
 
         /// <summary>
@@ -143,7 +159,7 @@ namespace Plugin.XFInAppBilling
             {
                 await ConnectAsync();
             }
-
+        
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
             // BillingClient?.QueryPurchasesAsync(type, this);
 
@@ -162,7 +178,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// temporarily holds the product to purchase
         /// </summary>
-        private SkuDetails? ProductToPurcase { get; set; }
+        private SkuDetails? ProductToPurchase { get; set; }
 
         /// <summary>
         /// Does a purchase on BillingClient
@@ -174,10 +190,11 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
         {
+            PurchaseResult purchaseResult;
             var productIds = new List<string> { productId };
-
+ 
             await GetSkuDetails(itemType, productIds);
-            var purchaseResult = await DoPurchaseAsync(ProductToPurcase);
+            purchaseResult = await DoPurchaseAsync(ProductToPurchase);
 
             return purchaseResult;
         }
@@ -240,7 +257,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="proration">Proration</param>
         /// <returns></returns>
         public async Task<PurchaseResult> UpdateSubscriptionAsync(string oldSubscriptionToken, string newSubscriptionId, Proration proration)
-        {             
+        {
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
@@ -252,19 +269,19 @@ namespace Plugin.XFInAppBilling
             ///gets the Sku details for the new subscription from the API
             await GetSkuDetails(ItemType.Subscription, new List<string> { newSubscriptionId });
 
-            if (ProductToPurcase == null)
+            if (ProductToPurchase == null)
             {
                 throw new Exception("Purchase Product not found");
-            }            
+            }
 
             ///Starts the UpdateFlow
             var prms = BillingFlowParams.SubscriptionUpdateParams.NewBuilder().SetOldSkuPurchaseToken(oldSubscriptionToken).SetReplaceSkusProrationMode(desiredProration);
 
-            BillingFlowParams flowParams = BillingFlowParams.NewBuilder().SetSubscriptionUpdateParams(prms.Build()).SetSkuDetails(ProductToPurcase).Build();
+            BillingFlowParams flowParams = BillingFlowParams.NewBuilder().SetSubscriptionUpdateParams(prms.Build()).SetSkuDetails(ProductToPurchase).Build();
 
             BillingResult responseCode = BillingClient.LaunchBillingFlow(Activity, flowParams);
 
-            return await _tcsPurchase?.Task ?? default; 
+            return await _tcsPurchase?.Task ?? default;
         }
 
         /// <summary>
@@ -288,7 +305,7 @@ namespace Plugin.XFInAppBilling
                     return BillingFlowParams.ProrationMode.ImmediateAndChargeFullPrice;
                 default:
                     return BillingFlowParams.ProrationMode.ImmediateWithTimeProration;
-            } 
+            }
         }
 
         /// <summary>
@@ -371,26 +388,6 @@ namespace Plugin.XFInAppBilling
             BillingClient?.LaunchBillingFlow(Activity, flowParams);
             return await _tcsPurchase.Task;
         }
-
-        /// <summary>
-        /// Returns product or subs to purchase as SkudDetails
-        /// </summary>
-        /// <param name="itemType"></param>
-        /// <param name="purchaseResult"></param>
-        /// <param name="productIds"></param>
-        /// <returns></returns>
-        private async Task<SkuDetails> GetSkuDetails(ItemType itemType, List<string> productIds)
-        {
-            await GetProductsAsync(productIds, itemType);
-
-            if (ProductToPurcase == null)
-            {
-                throw new Exception("Purchase Product not found");
-            }
-
-            return ProductToPurcase;
-        }
-
 
         #region ResponseHandlers
 
@@ -475,20 +472,21 @@ namespace Plugin.XFInAppBilling
         /// <param name="purchases"></param>
         public async void OnPurchasesUpdated(BillingResult billingResult, IList<Purchase>? purchases)
         {
-            if(purchases?.Count> 0) //empty if purchase is deferred after a purchase process. GetPurchasesAsync should be called to get the status if deferred
+            if (purchases?.Count > 0) //empty if purchase is deferred after a purchase process. GetPurchasesAsync should be called to get the status if deferred
             {
                 CheckResultNotNull(billingResult);
 
-            var purchaseResult = await GetPurchaseResult(billingResult, purchases);
+                var purchaseResult = await GetPurchaseResult(billingResult, purchases);
 
-            var errorCode = GetErrorCode(billingResult);
-            if (errorCode != null) //No error
-            {
-                _tcsPurchase?.TrySetException(errorCode);
-            }
-            else
-            {
-                _tcsPurchase?.TrySetResult(purchaseResult ?? new PurchaseResult() { PurchaseState = PurchaseState.Failed });
+                var errorCode = GetErrorCode(billingResult);
+                if (errorCode != null) //No error
+                {
+                    _tcsPurchase?.TrySetException(errorCode);
+                }
+                else
+                {
+                    _tcsPurchase?.TrySetResult(purchaseResult ?? new PurchaseResult() { PurchaseState = PurchaseState.Failed });
+                }
             }
         }
 
@@ -509,7 +507,7 @@ namespace Plugin.XFInAppBilling
                 purchaseResult.PurchaseState = PurchaseState.Purchased;
                 if (purchases?.Count > 0)
                 {
-                    var purchaseResults = await GetPurchaseResults(purchases);
+                    var purchaseResults = await GetPurchasesAsync(purchases);
                     purchaseResult = purchaseResults?.OrderByDescending(p => p.ExpirationDate).Last();
                 }
             }
@@ -542,7 +540,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="purchases"></param>
         /// <returns></returns>
-        private async Task<List<PurchaseResult>> GetPurchaseResults(IList<Purchase> purchases)
+        private async Task<List<PurchaseResult>> GetPurchasesAsync(IList<Purchase> purchases)
         {
             var purchaseResults = new List<PurchaseResult>();
             if (purchases?.Count > 0)
@@ -638,7 +636,7 @@ namespace Plugin.XFInAppBilling
                         });
                     }
 
-                    ProductToPurcase = querySkuDetailsResult.SkuDetails[0];
+                    ProductToPurchase = querySkuDetailsResult.SkuDetails[0];
                 }
             }
 
