@@ -94,7 +94,7 @@ namespace Plugin.XFInAppBilling
             return productRequestDelegate.WaitForResponse();
         }
 
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase = null, string verifyOnlyProductId = null)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType,  string verifyOnlyProductId = null)
         {
             var purchases = await RestoreAsync();
 

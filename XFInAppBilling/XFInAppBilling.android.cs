@@ -148,10 +148,9 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// Get All purchases regardless of status
         /// </summary>
-        /// <param name="itemType"></param>
-        /// <param name="verifyPurchase"></param>
+        /// <param name="itemType"></param> 
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, IInAppBillingVerifyPurchase? verifyPurchase = null, string? verifyOnlyProductId = null)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType)
         {
             // _tcsPurchases = new TaskCompletionSource<List<PurchaseResult>>();
             List<PurchaseResult> purchases = new List<PurchaseResult>();
@@ -159,7 +158,7 @@ namespace Plugin.XFInAppBilling
             {
                 await ConnectAsync();
             }
-        
+
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
             // BillingClient?.QueryPurchasesAsync(type, this);
 
@@ -186,13 +185,12 @@ namespace Plugin.XFInAppBilling
         /// <param name="productId">Sku of Product or Subscription to purchase</param>
         /// <param name="itemType">subscription or iap product</param>
         /// <param name="payload">developer payload to verify</param>
-        /// <param name="verifyPurchase">not used, only for IOS</param>
         /// <returns></returns>
-        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
+        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null)
         {
             PurchaseResult purchaseResult;
             var productIds = new List<string> { productId };
- 
+
             await GetSkuDetails(itemType, productIds);
             purchaseResult = await DoPurchaseAsync(ProductToPurchase);
 
@@ -220,18 +218,17 @@ namespace Plugin.XFInAppBilling
         /// and as a result of consumption, the user will no longer own it.
         /// </summary>
         /// <param name="productId">Sku of the consumable product</param>
-        /// <param name="itemType">product</param>
+        /// <param name="itemType">product</param>     
         /// <param name="payload">Deprecated for Android after 2.2 version</param>
-        /// <param name="verifyPurchase"></param>
         /// <returns></returns>
-        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase? verifyPurchase = null)
+        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload)
         {
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
             }
 
-            var purchases = await GetPurchasesAsync(itemType, verifyPurchase);
+            var purchases = await GetPurchasesAsync(itemType);
 
             var purchase = purchases?.FirstOrDefault(p => p.Sku == productId && p.DeveloperPayload == payload && p.ConsumptionState == ConsumptionState.NoYetConsumed);
 

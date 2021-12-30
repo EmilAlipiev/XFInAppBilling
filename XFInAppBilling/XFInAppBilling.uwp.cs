@@ -129,7 +129,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="payload">not used for UWP</param>
         /// <param name="verifyPurchase">not used for UWP</param>
         /// <returns></returns>
-        public Task<PurchaseResult> PurchaseAsync(string subscriptionStoreId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
+        public Task<PurchaseResult> PurchaseAsync(string subscriptionStoreId, ItemType itemType = ItemType.InAppPurchase, string payload = null)
         {
             return SetupSubscriptionInfoAsync(subscriptionStoreId);
         }
@@ -154,7 +154,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType">not used for UWP</param>
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null, string verifyOnlyProductId = null)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase)
         {
             if (context == null)
                 context = StoreContext.GetDefault();
@@ -381,7 +381,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="payload"></param>
         /// <param name="verifyPurchase">not used in uwp</param>
         /// <returns></returns>
-        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null)
+        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload)
         {
             return await ConsumePurchase(productId, payload);
         }
