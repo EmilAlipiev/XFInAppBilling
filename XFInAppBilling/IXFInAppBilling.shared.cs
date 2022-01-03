@@ -13,7 +13,7 @@ namespace Plugin.XFInAppBilling
     public interface IXFInAppBilling : IDisposable
     {
         /// <summary>
-        /// 
+        /// User For Ios from AppStoreReceiptUrl
         /// </summary>
         string ReceiptData { get; }
 

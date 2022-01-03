@@ -208,9 +208,11 @@ namespace Plugin.XFInAppBilling
             };
 
             return purchase;
-        }        
+        }
 
-
+        /// <summary>
+        /// Get the Receipt data from Bundle AppStoreReceiptUrl
+        /// </summary>
         public string ReceiptData
         {
             get
