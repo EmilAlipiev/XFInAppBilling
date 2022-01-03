@@ -16,6 +16,8 @@ namespace Plugin.XFInAppBilling
     [Preserve(AllMembers = true)]
     public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener, IPurchasesResponseListener
     {
+        public string ReceiptData { get; }
+
         private bool _isServiceConnected;
 
         Activity Activity =>
@@ -37,8 +39,6 @@ namespace Plugin.XFInAppBilling
         TaskCompletionSource<PurchaseResult> _tcsPurchase;
         TaskCompletionSource<List<PurchaseResult>> _tcsPurchases;
         TaskCompletionSource<bool> _tcsAcknowledge;
-
-
 
         #region API Functions
 
@@ -186,31 +186,24 @@ namespace Plugin.XFInAppBilling
         /// <param name="itemType">subscription or iap product</param>
         /// <param name="payload">developer payload to verify</param>
         /// <returns></returns>
-        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null)
+        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string obfuscatedAccountId = null, string obfuscatedProfileId = null)
         {
             PurchaseResult purchaseResult;
             var productIds = new List<string> { productId };
+            if (itemType == ItemType.Subscription)
+            {
+                var result = BillingClient.IsFeatureSupported(BillingClient.FeatureType.Subscriptions);
+                if (result == null)
+                {
+                    throw new InAppBillingPurchaseException(PurchaseError.GeneralError, "IsFeatureSupported null returned");
+                }
 
+                GetErrorCode(result);
+            }
             await GetSkuDetails(itemType, productIds);
-            purchaseResult = await DoPurchaseAsync(ProductToPurchase);
+            purchaseResult = await DoPurchaseAsync(ProductToPurchase, obfuscatedAccountId, obfuscatedProfileId);
 
             return purchaseResult;
-        }
-
-        /// <summary>
-        /// Consumes a consumable product
-        /// </summary>
-        /// <param name="productId"></param>
-        /// <param name="purchaseToken"></param>
-        /// <returns></returns>
-        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken)
-        {
-            if (BillingClient == null || !BillingClient.IsReady)
-            {
-                await ConnectAsync();
-            }
-
-            return await CompleteConsume(purchaseToken);
         }
 
         /// <summary>
@@ -221,29 +214,35 @@ namespace Plugin.XFInAppBilling
         /// <param name="itemType">product</param>     
         /// <param name="payload">Deprecated for Android after 2.2 version</param>
         /// <returns></returns>
-        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload)
+        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken = null)
         {
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
             }
 
-            var purchases = await GetPurchasesAsync(itemType);
-
-            var purchase = purchases?.FirstOrDefault(p => p.Sku == productId && p.DeveloperPayload == payload && p.ConsumptionState == ConsumptionState.NoYetConsumed);
-
-            if (purchase is null)
+            if (purchaseToken != null)
             {
-                purchase = purchases?.FirstOrDefault(p => p.Sku == productId && p.DeveloperPayload == payload);
+                var purchases = await GetPurchasesAsync(ItemType.InAppPurchase);
+
+                var purchase = purchases?.FirstOrDefault(p => p.Sku == productId && p.ConsumptionState == ConsumptionState.NoYetConsumed);
+
+                if (purchase is null)
+                {
+                    purchase = purchases?.FirstOrDefault(p => p.Sku == productId);
+                }
+
+                if (purchase is null && !string.IsNullOrWhiteSpace(purchase?.PurchaseToken))
+                {
+                    Console.WriteLine("Unable to find a purchase with matching product id and payload");
+                    throw new Exception("Unable to find a purchase with matching product id and payload");
+                }
+
+                purchaseToken = purchase.PurchaseToken;
             }
 
-            if (purchase is null)
-            {
-                Console.WriteLine("Unable to find a purchase with matching product id and payload");
-                throw new Exception("Unable to find a purchase with matching product id and payload");
-            }
 
-            return await CompleteConsume(purchase.PurchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
+            return await CompleteConsume(purchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
         }
 
         /// <summary>
@@ -373,16 +372,22 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        private async Task<PurchaseResult> DoPurchaseAsync(SkuDetails product)
+        private async Task<PurchaseResult> DoPurchaseAsync(SkuDetails product, string obfuscatedAccountId, string obfuscatedProfileId)
         {
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
             }
             _tcsPurchase = new TaskCompletionSource<PurchaseResult>();
+            var fowParamsBuilder = BillingFlowParams.NewBuilder().SetSkuDetails(product);
 
-            BillingFlowParams flowParams = BillingFlowParams.NewBuilder().SetSkuDetails(product).Build();
-            BillingClient?.LaunchBillingFlow(Activity, flowParams);
+            if (!string.IsNullOrWhiteSpace(obfuscatedAccountId))
+                fowParamsBuilder.SetObfuscatedAccountId(obfuscatedAccountId);
+
+            if (!string.IsNullOrWhiteSpace(obfuscatedProfileId))
+                fowParamsBuilder.SetObfuscatedProfileId(obfuscatedProfileId);
+
+            BillingClient?.LaunchBillingFlow(Activity, fowParamsBuilder.Build());
             return await _tcsPurchase.Task;
         }
 

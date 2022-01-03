@@ -10,6 +10,8 @@ namespace Plugin.XFInAppBilling
     /// </summary>
     public class XFInAppBillingImplementation : IXFInAppBilling
     {
+        public string ReceiptData { get; }
+
         public Task<bool> CheckIfUserHasActiveSubscriptionAsync(string subscriptionId, ItemType itemType = ItemType.InAppPurchase)
         {
             throw new NotImplementedException();
@@ -65,7 +67,17 @@ namespace Plugin.XFInAppBilling
             throw new NotImplementedException();
         }
 
+        public Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string obfuscatedAccountId = null, string obfuscatedProfileId = null)
         {
             throw new NotImplementedException();
         }
