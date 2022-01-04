@@ -192,6 +192,10 @@ namespace Plugin.XFInAppBilling
             var productIds = new List<string> { productId };
             if (itemType == ItemType.Subscription)
             {
+                if (BillingClient == null || !BillingClient.IsReady)
+                {
+                    await ConnectAsync();
+                }
                 var result = BillingClient.IsFeatureSupported(BillingClient.FeatureType.Subscriptions);
                 if (result == null)
                 {
