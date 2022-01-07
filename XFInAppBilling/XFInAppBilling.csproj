@@ -7,7 +7,7 @@
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-		<Version>4.0.8-pre2</Version>
+		<Version>4.0.8-pre3</Version>
 		<Authors>Emil Alipiev</Authors>
 		<PackageId>XFInAppBilling</PackageId>
 		<PackOnBuild>true</PackOnBuild>
@@ -23,10 +23,7 @@
 			If your project is not using AndoridX and below 4.5 please use Version 1 of this library. Starting from Version 2 XF 4.5 and above is supported. I try to apply same changes on both branches.
 		</Description>
 		<PackageReleaseNotes>
-			Android Billing library update to 4.0
-			https://developer.android.com/google/play/billing/release-notes#4-0
-			
-			-Subscription Update for Android added. Dowgrade, Upgrade subscriptions
+		  AcknowledgePurchase separated from PurchaseAsync
 		</PackageReleaseNotes>
 		<Copyright>Copyright 2020</Copyright>
 		<RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBilling</RepositoryUrl>
