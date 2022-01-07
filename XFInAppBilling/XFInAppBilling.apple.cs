@@ -416,7 +416,6 @@ namespace Plugin.XFInAppBilling
             throw new NotImplementedException();
         }
 
-
         /// <summary>
         /// Dispose of class and parent classes
         /// </summary>
@@ -424,6 +423,11 @@ namespace Plugin.XFInAppBilling
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        public Task<bool> AcknowledgePurchase(string purchaseToken)
+        {
+            throw new NotImplementedException();
         }
     }
 

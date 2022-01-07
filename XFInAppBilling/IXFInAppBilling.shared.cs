@@ -35,6 +35,13 @@ namespace Plugin.XFInAppBilling
         Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string obfuscatedAccountId = null, string obfuscatedProfileId = null);
 
         /// <summary>
+        ///  Acknowledge Purchase
+        /// </summary>
+        /// <param name="purchaseToken"></param>
+        /// <returns></returns>
+        Task<bool> AcknowledgePurchase(string purchaseToken);
+
+        /// <summary>
         /// Gets all current purchases with status information
         /// </summary>
         /// <param name="itemType">only used for Google, not used for UWP, Amazon</param>    

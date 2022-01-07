@@ -480,6 +480,11 @@ namespace Plugin.XFInAppBilling
             throw new NotImplementedException();
         }
 
+        public Task<bool> AcknowledgePurchase(string purchaseToken)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

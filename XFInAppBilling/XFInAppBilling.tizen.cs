@@ -12,6 +12,11 @@ namespace Plugin.XFInAppBilling
     {
         public string ReceiptData { get; }
 
+        public Task<bool> AcknowledgePurchase(string purchaseToken)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<bool> CheckIfUserHasActiveSubscriptionAsync(string subscriptionId, ItemType itemType = ItemType.InAppPurchase)
         {
             throw new NotImplementedException();
