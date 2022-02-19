@@ -10,8 +10,13 @@ namespace Plugin.XFInAppBilling
     /// Interface for XFInAppBilling
     /// </summary>
     [Preserve(AllMembers = true)]
-    public interface IXFInAppBilling: IDisposable
+    public interface IXFInAppBilling : IDisposable
     {
+        /// <summary>
+        /// User For Ios from AppStoreReceiptUrl
+        /// </summary>
+        string ReceiptData { get; }
+
         /// <summary>
         /// Gets all the available/purchasable IAPs and Subscriptions
         /// </summary>
@@ -23,20 +28,25 @@ namespace Plugin.XFInAppBilling
         /// Initiates a purchase flow and completes it
         /// </summary>
         /// <param name="productId">in app purchase or subscription Id to be purchased</param>
-        /// <param name="itemType">only used for Google, not used for UWP, Amazon</param>
-        /// <param name="payload">only used for Google, not used for UWP, Amazon</param>
-        /// <param name="verifyPurchase">only used for Google and IOS, not used for UWP, Amazon</param>
+        /// <param name="itemType">only used for Google, not used for UWP, Amazon, Ios</param>
+        /// <param name="obfuscatedAccountId">only used for Google, not used for UWP, Amazon, Ios</param>
+        /// <param name="obfuscatedProfileId">only used for Google, not used for UWP, Amazon,Ios</param>
         /// <returns></returns>
-        Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null);
+        Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string obfuscatedAccountId = null, string obfuscatedProfileId = null);
+
+        /// <summary>
+        ///  Acknowledge Purchase
+        /// </summary>
+        /// <param name="purchaseToken"></param>
+        /// <returns></returns>
+        Task<bool> AcknowledgePurchase(string purchaseToken);
 
         /// <summary>
         /// Gets all current purchases with status information
         /// </summary>
         /// <param name="itemType">only used for Google, not used for UWP, Amazon</param>    
-        /// <param name="verifyPurchase">ios only</param>
-        /// <param name="verifyOnlyProductId">ios only</param>
         /// <returns></returns>
-        Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null, string verifyOnlyProductId = null);
+        Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase);
 
         /// <summary>
         /// Checks if user has any active subscription. It mostly calls GetPurchasesAsync and filters by given subscriptionId
@@ -76,34 +86,14 @@ namespace Plugin.XFInAppBilling
         /// Consume a purchase with a purchase token.
         /// </summary>
         /// <param name="productId">Id or Sku of product</param>
-        /// <param name="purchaseToken">Original Purchase Token</param>
+        /// <param name="purchaseToken">Original Purchase Token- optional if provided productid is ignored</param>
         /// <returns>If consumed successful</returns>
         /// <exception cref="InAppBillingPurchaseException">If an error occures during processing</exception>
-        Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken);
-
-        /// <summary>
-        /// Consume a purchase
-        /// </summary>
-        /// <param name="productId">Id/Sku of the product</param>
-        /// <param name="payload">Developer specific payload of original purchase.Deprecated after billingClient 2.2</param>
-        /// <param name="itemType">Type of product being consumed.</param>
-        /// <param name="verifyPurchase">Verify Purchase implementation</param>
-        /// <returns>If consumed successful</returns>
-        /// <exception cref="InAppBillingPurchaseException">If an error occurs during processing</exception>
-        Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null);
+        Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken = null);
 
         Task<bool> FinishTransaction(PurchaseResult purchase);
 
         Task<bool> FinishTransaction(string purchaseId);
-
-        /// <summary>
-        /// Verifies a specific product type and product id. Use e.g. when product is already purchased but verification failed and needs to be called again.
-        /// </summary>
-        /// <param name="itemType">Type of product</param>
-        /// <param name="verifyPurchase">Interface to verify purchase</param>
-        /// <param name="productId">Id of product</param>
-        /// <returns>The current purchases</returns>
-        Task<bool> VerifyPreviousPurchaseAsync(ItemType itemType, IInAppBillingVerifyPurchase verifyPurchase, string productId);
 
         #endregion
     }

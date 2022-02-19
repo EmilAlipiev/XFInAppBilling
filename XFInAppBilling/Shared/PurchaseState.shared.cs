@@ -61,6 +61,10 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// used for consume only
         /// </summary>
-        InsufficentQuantity = 12
+        InsufficentQuantity = 12,
+        /// <summary>
+        /// 
+        /// </summary>
+        Deferred = 13
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Windows.Services.Store;
 
 namespace Plugin.XFInAppBilling
@@ -90,8 +91,8 @@ namespace Plugin.XFInAppBilling
                                         LocalizedPrice = product.Price.FormattedRecurrencePrice,
                                         Description = sku.Description,
                                         Name = product.Title,
-                                        OriginalPrice= product.Price.FormattedBasePrice,
-                                        LocalizedIntroductoryPrice= product.Price.FormattedPrice,
+                                        OriginalPrice = product.Price.FormattedBasePrice,
+                                        LocalizedIntroductoryPrice = product.Price.FormattedPrice,
                                         SaleEndDate = product.Price.SaleEndDate,
                                         IsOnSale = product.Price.IsOnSale,
                                         FreeTrialPeriod = sku.SubscriptionInfo.HasTrialPeriod ? sku.SubscriptionInfo.TrialPeriod + " " + sku.SubscriptionInfo.TrialPeriodUnit.ToString() : null
@@ -107,8 +108,8 @@ namespace Plugin.XFInAppBilling
                                         LocalizedIntroductoryPrice = product.Price.FormattedPrice,
                                         Description = sku.Description,
                                         Name = product.Title,
-                                        SaleEndDate= product.Price.SaleEndDate,
-                                        IsOnSale= product.Price.IsOnSale
+                                        SaleEndDate = product.Price.SaleEndDate,
+                                        IsOnSale = product.Price.IsOnSale
                                     });
                                 }
 
@@ -126,10 +127,10 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="subscriptionStoreId"></param>
         /// <param name="itemType"></param>
-        /// <param name="payload">not used for UWP</param>
-        /// <param name="verifyPurchase">not used for UWP</param>
+        /// <param name="obfuscatedAccountId">not used for UWP</param>
+        /// <param name="obfuscatedProfileId">not used for UWP</param>
         /// <returns></returns>
-        public Task<PurchaseResult> PurchaseAsync(string subscriptionStoreId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
+        public Task<PurchaseResult> PurchaseAsync(string subscriptionStoreId, ItemType itemType = ItemType.InAppPurchase, string obfuscatedAccountId = null, string obfuscatedProfileId = null)
         {
             return SetupSubscriptionInfoAsync(subscriptionStoreId);
         }
@@ -154,7 +155,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType">not used for UWP</param>
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, IInAppBillingVerifyPurchase verifyPurchase = null, string verifyOnlyProductId = null)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase)
         {
             if (context == null)
                 context = StoreContext.GetDefault();
@@ -365,28 +366,15 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// Consumes a consumable iap
         /// </summary>
-        /// <param name="productId">Product sku or storeId</param>
-        /// <param name="purchaseToken">not used in uwp</param>
-        /// <returns></returns>
-        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken)
-        {
-            return await ConsumePurchase(productId, null);
-        }
-
-        /// <summary>
-        /// Consumes a consumable iap
-        /// </summary>
         /// <param name="productId"></param>
-        /// <param name="itemType"></param>
-        /// <param name="payload"></param>
-        /// <param name="verifyPurchase">not used in uwp</param>
+        /// <param name="purchaseToken"></param>
         /// <returns></returns>
-        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase verifyPurchase = null)
+        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken = null)
         {
-            return await ConsumePurchase(productId, payload);
+            return await ConsumePurchase(productId);
         }
 
-        private async Task<PurchaseResult> ConsumePurchase(string productId, string payload)
+        private async Task<PurchaseResult> ConsumePurchase(string productId)
         {
             if (context == null)
             {
@@ -402,8 +390,8 @@ namespace Plugin.XFInAppBilling
             // to just report the add-on as fulfilled to the Store.
             uint quantity = 1;
             string addOnStoreId = productId;
-            if (payload == null || !Guid.TryParse(payload, out Guid trackingId))
-                trackingId = Guid.NewGuid();
+
+            var trackingId = Guid.NewGuid();
 
             StoreConsumableResult result = await context.ReportConsumableFulfillmentAsync(
                 addOnStoreId, quantity, trackingId);
@@ -427,6 +415,7 @@ namespace Plugin.XFInAppBilling
 
         #region NOTUSED FOR UWP
 
+        public string ReceiptData { get; }
         /// <summary>
         ///  IOS only, not implemented for Android
         /// </summary>
@@ -487,6 +476,11 @@ namespace Plugin.XFInAppBilling
         }
 
         public Task<PurchaseResult> UpdateSubscriptionAsync(string oldSubscriptionToken, string newSubscriptionId, Proration proration)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> AcknowledgePurchase(string purchaseToken)
         {
             throw new NotImplementedException();
         }

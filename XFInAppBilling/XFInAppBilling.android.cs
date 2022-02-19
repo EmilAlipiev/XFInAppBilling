@@ -16,6 +16,8 @@ namespace Plugin.XFInAppBilling
     [Preserve(AllMembers = true)]
     public class XFInAppBillingImplementation : Java.Lang.Object, IXFInAppBilling, IBillingClientStateListener, IPurchasesUpdatedListener, IAcknowledgePurchaseResponseListener, IPurchasesResponseListener
     {
+        public string ReceiptData { get; }
+
         private bool _isServiceConnected;
 
         Activity Activity =>
@@ -37,8 +39,6 @@ namespace Plugin.XFInAppBilling
         TaskCompletionSource<PurchaseResult> _tcsPurchase;
         TaskCompletionSource<List<PurchaseResult>> _tcsPurchases;
         TaskCompletionSource<bool> _tcsAcknowledge;
-
-
 
         #region API Functions
 
@@ -148,10 +148,9 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// Get All purchases regardless of status
         /// </summary>
-        /// <param name="itemType"></param>
-        /// <param name="verifyPurchase"></param>
+        /// <param name="itemType"></param> 
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, IInAppBillingVerifyPurchase? verifyPurchase = null, string? verifyOnlyProductId = null)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType)
         {
             // _tcsPurchases = new TaskCompletionSource<List<PurchaseResult>>();
             List<PurchaseResult> purchases = new List<PurchaseResult>();
@@ -159,14 +158,14 @@ namespace Plugin.XFInAppBilling
             {
                 await ConnectAsync();
             }
-        
+
             var type = itemType == ItemType.InAppPurchase ? BillingClient.SkuType.Inapp : BillingClient.SkuType.Subs;
             // BillingClient?.QueryPurchasesAsync(type, this);
 
             var purchaseResult = BillingClient?.QueryPurchases(type);
             if (purchaseResult?.PurchasesList?.Count > 0)
             {
-                purchases = await GetPurchasesAsync(purchaseResult.PurchasesList);
+                purchases = GetPurchasesAsync(purchaseResult.PurchasesList);
                 return purchases;
             }
 
@@ -186,33 +185,29 @@ namespace Plugin.XFInAppBilling
         /// <param name="productId">Sku of Product or Subscription to purchase</param>
         /// <param name="itemType">subscription or iap product</param>
         /// <param name="payload">developer payload to verify</param>
-        /// <param name="verifyPurchase">not used, only for IOS</param>
         /// <returns></returns>
-        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string payload = null, IInAppBillingVerifyPurchase verifyPurchase = null)
+        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string obfuscatedAccountId = null, string obfuscatedProfileId = null)
         {
             PurchaseResult purchaseResult;
             var productIds = new List<string> { productId };
- 
+            if (itemType == ItemType.Subscription)
+            {
+                if (BillingClient == null || !BillingClient.IsReady)
+                {
+                    await ConnectAsync();
+                }
+                var result = BillingClient.IsFeatureSupported(BillingClient.FeatureType.Subscriptions);
+                if (result == null)
+                {
+                    throw new InAppBillingPurchaseException(PurchaseError.GeneralError, "IsFeatureSupported null returned");
+                }
+
+                GetErrorCode(result);
+            }
             await GetSkuDetails(itemType, productIds);
-            purchaseResult = await DoPurchaseAsync(ProductToPurchase);
+            purchaseResult = await DoPurchaseAsync(ProductToPurchase, obfuscatedAccountId, obfuscatedProfileId);
 
             return purchaseResult;
-        }
-
-        /// <summary>
-        /// Consumes a consumable product
-        /// </summary>
-        /// <param name="productId"></param>
-        /// <param name="purchaseToken"></param>
-        /// <returns></returns>
-        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken)
-        {
-            if (BillingClient == null || !BillingClient.IsReady)
-            {
-                await ConnectAsync();
-            }
-
-            return await CompleteConsume(purchaseToken);
         }
 
         /// <summary>
@@ -220,33 +215,38 @@ namespace Plugin.XFInAppBilling
         /// and as a result of consumption, the user will no longer own it.
         /// </summary>
         /// <param name="productId">Sku of the consumable product</param>
-        /// <param name="itemType">product</param>
+        /// <param name="itemType">product</param>     
         /// <param name="payload">Deprecated for Android after 2.2 version</param>
-        /// <param name="verifyPurchase"></param>
         /// <returns></returns>
-        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, ItemType itemType, string payload, IInAppBillingVerifyPurchase? verifyPurchase = null)
+        public async Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken = null)
         {
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
             }
 
-            var purchases = await GetPurchasesAsync(itemType, verifyPurchase);
-
-            var purchase = purchases?.FirstOrDefault(p => p.Sku == productId && p.DeveloperPayload == payload && p.ConsumptionState == ConsumptionState.NoYetConsumed);
-
-            if (purchase is null)
+            if (purchaseToken == null)
             {
-                purchase = purchases?.FirstOrDefault(p => p.Sku == productId && p.DeveloperPayload == payload);
+                var purchases = await GetPurchasesAsync(ItemType.InAppPurchase);
+
+                var purchase = purchases?.FirstOrDefault(p => p.Sku == productId && p.ConsumptionState == ConsumptionState.NoYetConsumed);
+
+                if (purchase is null)
+                {
+                    purchase = purchases?.FirstOrDefault(p => p.Sku == productId);
+                }
+
+                if (purchase is null || string.IsNullOrWhiteSpace(purchase.PurchaseToken))
+                {
+                    Console.WriteLine("Unable to find a purchase with matching product id and payload");
+                    throw new Exception("Unable to find a purchase with matching product id and payload");
+                }
+
+                purchaseToken = purchase.PurchaseToken;
             }
 
-            if (purchase is null)
-            {
-                Console.WriteLine("Unable to find a purchase with matching product id and payload");
-                throw new Exception("Unable to find a purchase with matching product id and payload");
-            }
 
-            return await CompleteConsume(purchase.PurchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
+            return await CompleteConsume(purchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
         }
 
         /// <summary>
@@ -328,29 +328,26 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="purchase"></param>
         /// <returns></returns>
-        private async Task<bool> NotifyFullFillmentAsync(Purchase purchase)
+        private async Task<bool> NotifyFullFillmentAsync(string purchaseToken)
         {
-            if (purchase == null)
+            if (string.IsNullOrWhiteSpace(purchaseToken))
                 return false;
 
-            if (!purchase.IsAcknowledged)
+
+            if (BillingClient == null || !BillingClient.IsReady)
             {
-                if (BillingClient == null || !BillingClient.IsReady)
-                {
-                    await ConnectAsync();
-                }
-
-                _tcsAcknowledge = new TaskCompletionSource<bool>();
-
-                AcknowledgePurchaseParams acknowledgePurchaseParams =
-                                        AcknowledgePurchaseParams.NewBuilder()
-                                            .SetPurchaseToken(purchase.PurchaseToken)
-                                            .Build();
-                BillingClient?.AcknowledgePurchase(acknowledgePurchaseParams, this);
-
-                return await _tcsAcknowledge.Task;
+                await ConnectAsync();
             }
-            return true;
+
+            _tcsAcknowledge = new TaskCompletionSource<bool>();
+
+            AcknowledgePurchaseParams acknowledgePurchaseParams =
+                                    AcknowledgePurchaseParams.NewBuilder()
+                                        .SetPurchaseToken(purchaseToken)
+                                        .Build();
+            BillingClient?.AcknowledgePurchase(acknowledgePurchaseParams, this);
+
+            return await _tcsAcknowledge.Task;             
         }
 
         #endregion
@@ -368,7 +365,7 @@ namespace Plugin.XFInAppBilling
             if (response is null)
                 throw new Exception("An error occured");
 
-            return await OnConsumeResponse(response.BillingResult, response.PurchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
+            return OnConsumeResponse(response.BillingResult, response.PurchaseToken) ?? new PurchaseResult { PurchaseState = PurchaseState.Failed };
         }
 
         /// <summary>
@@ -376,17 +373,32 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        private async Task<PurchaseResult> DoPurchaseAsync(SkuDetails product)
+        private async Task<PurchaseResult> DoPurchaseAsync(SkuDetails product, string obfuscatedAccountId, string obfuscatedProfileId)
         {
             if (BillingClient == null || !BillingClient.IsReady)
             {
                 await ConnectAsync();
             }
             _tcsPurchase = new TaskCompletionSource<PurchaseResult>();
+            var fowParamsBuilder = BillingFlowParams.NewBuilder().SetSkuDetails(product);
 
-            BillingFlowParams flowParams = BillingFlowParams.NewBuilder().SetSkuDetails(product).Build();
-            BillingClient?.LaunchBillingFlow(Activity, flowParams);
+            if (!string.IsNullOrWhiteSpace(obfuscatedAccountId))
+                fowParamsBuilder.SetObfuscatedAccountId(obfuscatedAccountId);
+
+            if (!string.IsNullOrWhiteSpace(obfuscatedProfileId))
+                fowParamsBuilder.SetObfuscatedProfileId(obfuscatedProfileId);
+
+            BillingClient?.LaunchBillingFlow(Activity, fowParamsBuilder.Build());
             return await _tcsPurchase.Task;
+        }
+
+        /// <summary>
+        /// Acknowledge a purchase
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> AcknowledgePurchase(string purchaseToken)
+        {
+            return await NotifyFullFillmentAsync(purchaseToken);
         }
 
         #region ResponseHandlers
@@ -470,13 +482,13 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="billingResult"></param>
         /// <param name="purchases"></param>
-        public async void OnPurchasesUpdated(BillingResult billingResult, IList<Purchase>? purchases)
+        public void OnPurchasesUpdated(BillingResult billingResult, IList<Purchase>? purchases)
         {
             if (purchases?.Count > 0) //empty if purchase is deferred after a purchase process. GetPurchasesAsync should be called to get the status if deferred
             {
                 CheckResultNotNull(billingResult);
 
-                var purchaseResult = await GetPurchaseResult(billingResult, purchases);
+                var purchaseResult = GetPurchaseResult(billingResult, purchases);
 
                 var errorCode = GetErrorCode(billingResult);
                 if (errorCode != null) //No error
@@ -496,7 +508,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="billingResult"></param>
         /// <param name="purchases"></param>
         /// <returns></returns>
-        private async Task<PurchaseResult> GetPurchaseResult(BillingResult billingResult, IList<Purchase>? purchases)
+        private PurchaseResult GetPurchaseResult(BillingResult billingResult, IList<Purchase>? purchases)
         {
             var purchaseResult = new PurchaseResult();
 
@@ -507,7 +519,7 @@ namespace Plugin.XFInAppBilling
                 purchaseResult.PurchaseState = PurchaseState.Purchased;
                 if (purchases?.Count > 0)
                 {
-                    var purchaseResults = await GetPurchasesAsync(purchases);
+                    var purchaseResults = GetPurchasesAsync(purchases);
                     purchaseResult = purchaseResults?.OrderByDescending(p => p.ExpirationDate).Last();
                 }
             }
@@ -533,66 +545,6 @@ namespace Plugin.XFInAppBilling
             {
                 throw new InAppBillingPurchaseException(PurchaseError.GeneralError, "BillingResult null returned");
             }
-        }
-
-        /// <summary>
-        /// Get PurchaseResults from a list of BillingClient Purchases
-        /// </summary>
-        /// <param name="purchases"></param>
-        /// <returns></returns>
-        private async Task<List<PurchaseResult>> GetPurchasesAsync(IList<Purchase> purchases)
-        {
-            var purchaseResults = new List<PurchaseResult>();
-            if (purchases?.Count > 0)
-            {
-                foreach (var purchase in purchases)
-                {
-                    if (purchase != null)
-                    {
-                        var purchaseResult = new PurchaseResult();
-                        PurchaseState purchaseState;
-                        switch (purchase.PurchaseState)
-                        {
-                            case Android.BillingClient.Api.PurchaseState.Pending:
-                                purchaseState = PurchaseState.Pending;
-                                break;
-                            case Android.BillingClient.Api.PurchaseState.Purchased:
-                                // Acknowledge the purchase if it hasn't already been acknowledged.
-                                if (await NotifyFullFillmentAsync(purchase))
-                                    purchaseState = PurchaseState.Purchased;
-                                else
-                                    purchaseState = PurchaseState.NotAknowledged;
-                                break;
-                            case Android.BillingClient.Api.PurchaseState.Unspecified:
-                                purchaseState = PurchaseState.Unspecified;
-                                break;
-                            default:
-                                purchaseState = PurchaseState.Unspecified;
-                                break;
-                        }
-
-                        if (purchase.Skus?.Count > 0)
-                        {
-                            purchaseResult.Sku = purchase.Skus[0];
-                            purchaseResult.Skus = purchase.Skus;
-                        }
-                        purchaseResult.Quantity = purchase.Quantity;
-                        purchaseResult.PurchaseToken = purchase.PurchaseToken;
-                        purchaseResult.PurchaseState = purchaseState;
-                        if (purchase.PurchaseTime > 0)
-                            purchaseResult.PurchaseDate = DateTimeOffset.FromUnixTimeMilliseconds(purchase.PurchaseTime).DateTime;
-
-                        purchaseResult.DeveloperPayload = purchase.DeveloperPayload;
-                        purchaseResult.IsAcknowledged = purchase.IsAcknowledged;
-                        purchaseResult.IsAutoRenewing = purchase.IsAutoRenewing;
-                        purchaseResult.OrderId = purchase.OrderId;
-
-                        purchaseResults.Add(purchaseResult);
-                    }
-                }
-            }
-
-            return purchaseResults;
         }
 
         /// <summary>
@@ -701,11 +653,11 @@ namespace Plugin.XFInAppBilling
         /// <param name="billingResult"></param>
         /// <param name="purchaseToken"></param>
         /// <returns></returns>
-        public async Task<PurchaseResult?> OnConsumeResponse(BillingResult billingResult, string purchaseToken)
+        public PurchaseResult? OnConsumeResponse(BillingResult billingResult, string purchaseToken)
         {
             CheckResultNotNull(billingResult);
 
-            var purchaseResult = await GetPurchaseResult(billingResult, null);
+            var purchaseResult = GetPurchaseResult(billingResult, null);
 
             var errorCode = GetErrorCode(billingResult);
             if (errorCode != null) //No error
@@ -723,7 +675,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="billingResult"></param>
         /// <param name="purchases"></param>
-        public async void OnQueryPurchasesResponse(BillingResult billingResult, IList<Purchase> purchases)
+        public void OnQueryPurchasesResponse(BillingResult billingResult, IList<Purchase> purchases)
         {
             _tcsPurchases = new TaskCompletionSource<List<PurchaseResult>>();
             var errorCode = GetErrorCode(billingResult);
@@ -733,7 +685,7 @@ namespace Plugin.XFInAppBilling
             }
             else
             {
-                var result = await GetPurchasesAsync(purchases);
+                var result = GetPurchasesAsync(purchases);
                 _tcsPurchases.TrySetResult(result);
             }
         }
@@ -749,6 +701,63 @@ namespace Plugin.XFInAppBilling
             base.Dispose(disposing);
             Disconnect();
         }
+
+        /// <summary>
+        /// Get PurchaseResults from a list of BillingClient Purchases
+        /// </summary>
+        /// <param name="purchases"></param>
+        /// <returns></returns>
+        private List<PurchaseResult> GetPurchasesAsync(IList<Purchase> purchases)
+        {
+            var purchaseResults = new List<PurchaseResult>();
+            if (purchases?.Count > 0)
+            {
+                foreach (var purchase in purchases)
+                {
+                    if (purchase != null)
+                    {
+                        var purchaseResult = new PurchaseResult();
+                        PurchaseState purchaseState;
+                        switch (purchase.PurchaseState)
+                        {
+                            case Android.BillingClient.Api.PurchaseState.Pending:
+                                purchaseState = PurchaseState.Pending;
+                                break;
+                            case Android.BillingClient.Api.PurchaseState.Purchased:
+                                purchaseState = PurchaseState.Purchased;
+                                break;
+                            case Android.BillingClient.Api.PurchaseState.Unspecified:
+                                purchaseState = PurchaseState.Unspecified;
+                                break;
+                            default:
+                                purchaseState = PurchaseState.Unspecified;
+                                break;
+                        }
+
+                        if (purchase.Skus?.Count > 0)
+                        {
+                            purchaseResult.Sku = purchase.Skus[0];
+                            purchaseResult.Skus = purchase.Skus;
+                        }
+                        purchaseResult.Quantity = purchase.Quantity;
+                        purchaseResult.PurchaseToken = purchase.PurchaseToken;
+                        purchaseResult.PurchaseState = purchaseState;
+                        if (purchase.PurchaseTime > 0)
+                            purchaseResult.PurchaseDate = DateTimeOffset.FromUnixTimeMilliseconds(purchase.PurchaseTime).DateTime;
+
+                        purchaseResult.DeveloperPayload = purchase.DeveloperPayload;
+                        purchaseResult.IsAcknowledged = purchase.IsAcknowledged;
+                        purchaseResult.IsAutoRenewing = purchase.IsAutoRenewing;
+                        purchaseResult.OrderId = purchase.OrderId;
+
+                        purchaseResults.Add(purchaseResult);
+                    }
+                }
+            }
+
+            return purchaseResults;
+        }
+
 
         /// <summary>
         /// Returns Exception if return code is not OK
@@ -810,7 +819,6 @@ namespace Plugin.XFInAppBilling
         {
             throw new NotImplementedException();
         }
-
 
         #endregion
     }

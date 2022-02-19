@@ -75,7 +75,8 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// The request has reached the maximum timeout before Google Play responds.
         /// </summary>
-        ServiceTimeout
+        ServiceTimeout,
+        AppleTermsConditionsChanged
     }
 
    
