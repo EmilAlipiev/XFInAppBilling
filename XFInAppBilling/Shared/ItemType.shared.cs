@@ -13,6 +13,10 @@
         /// <summary>
         /// On going subscription
         /// </summary>
-        Subscription
-    } 
+        Subscription,
+        /// <summary>
+        /// Consumable IAp
+        /// </summary>
+        InAppPurchaseConsumable
+    }
 }
