@@ -176,6 +176,7 @@ namespace Plugin.XFInAppBilling
                     CurrencyCode = p.PriceLocale?.CurrencyCode ?? string.Empty,
                     AppleExtras = new ProductAppleExt
                     {
+                        IsFamilyShareable = HasFamilyShareable && p.IsFamilyShareable,
                         SubscriptionGroupId = HasSubscriptionGroupId ? p.SubscriptionGroupIdentifier : null,
                         SubscriptionPeriod = p.ToSubscriptionPeriod(),
                         IntroductoryOffer = HasIntroductoryOffer ? p.IntroductoryPrice?.ToProductDiscount() : null,
