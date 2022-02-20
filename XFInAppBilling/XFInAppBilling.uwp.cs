@@ -155,7 +155,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType">not used for UWP</param>
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, List<string> doNotFinishTransactionIds = null)
         {
             if (context == null)
                 context = StoreContext.GetDefault();

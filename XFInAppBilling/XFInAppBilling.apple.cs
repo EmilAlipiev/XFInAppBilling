@@ -17,6 +17,17 @@ namespace Plugin.XFInAppBilling
     [Preserve(AllMembers = true)]
     public class XFInAppBillingImplementation : IXFInAppBilling, IDisposable
     {
+        /// <summary>
+        /// Connect to billing service
+        /// </summary>
+        /// <returns>If Success</returns>
+        public Task<bool> ConnectAsync() => Task.FromResult(true);
+        /// <summary>
+        /// Disconnect from the billing service
+        /// </summary>
+        /// <returns>Task to disconnect</returns>
+        public bool Disconnect() => true;
+
 #if __IOS__ || __TVOS__
         internal static bool HasIntroductoryOffer => UIKit.UIDevice.CurrentDevice.CheckSystemVersion(11, 2);
         internal static bool HasProductDiscounts => UIKit.UIDevice.CurrentDevice.CheckSystemVersion(12, 2);
@@ -96,7 +107,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// iOS: Displays a sheet that enables users to redeem subscription offer codes that you configure in App Store Connect.
         /// </summary>
-        public override void PresentCodeRedemption()
+        public void PresentCodeRedemption()
         {
 #if __IOS__ && !__MACCATALYST__
             if (HasFamilyShareable)
@@ -107,7 +118,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// Gets if user can make payments
         /// </summary>
-        public override bool CanMakePayments => SKPaymentQueue.CanMakePayments;
+        public bool CanMakePayments => SKPaymentQueue.CanMakePayments;
 
         /// <summary>
         /// Gets or sets a callback for out of band purchases to complete.
@@ -139,7 +150,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// Gets or sets if in testing mode. Only for UWP
         /// </summary>
-        public override bool InTestingMode { get; set; }
+        public bool InTestingMode { get; set; }
 
 
         /// <summary>
@@ -161,7 +172,7 @@ namespace Plugin.XFInAppBilling
                 ProductId = p.ProductIdentifier,
                 Description = p.LocalizedDescription,
                 CurrencyCode = p.PriceLocale?.CurrencyCode ?? string.Empty,
-                AppleExtras = new InAppBillingProductAppleExtras
+                AppleExtras = new ProductAppleExt
                 {
                     IsFamilyShareable = HasFamilyShareable && p.IsFamilyShareable,
                     SubscriptionGroupId = HasSubscriptionGroupId ? p.SubscriptionGroupIdentifier : null,
@@ -251,8 +262,6 @@ namespace Plugin.XFInAppBilling
             return tcsTransaction.Task;
         }
 
-
-
         static SKPaymentTransaction FindOriginalTransaction(SKPaymentTransaction transaction)
         {
             if (transaction == null)
@@ -266,11 +275,7 @@ namespace Plugin.XFInAppBilling
                 return FindOriginalTransaction(transaction.OriginalTransaction);
 
             return transaction;
-
         }
-
-
-
 
         /// <summary>
         /// Purchase a specific product or subscription
@@ -302,7 +307,6 @@ namespace Plugin.XFInAppBilling
 
             return purchase;
         }
-
 
         async Task<SKPaymentTransaction> PurchaseAsync(string sku, ItemType itemType)
         {
@@ -409,7 +413,7 @@ namespace Plugin.XFInAppBilling
                 return receiptUrl?.GetBase64EncodedString(NSDataBase64EncodingOptions.None);
             }
         }
-
+ 
 
         /// <summary>
         /// Consume a purchase with a purchase token.
@@ -417,10 +421,9 @@ namespace Plugin.XFInAppBilling
         /// <param name="productId">Id or Sku of product</param>
         /// <param name="purchaseToken">Original Purchase Token</param>
         /// <returns>If consumed successful</returns>
-        /// <exception cref="InAppBillingPurchaseException">If an error occurs during processing</exception>
-        public Task<bool> ConsumePurchaseAsync(string productId, string purchaseToken) =>
-            FinishTransaction(purchaseToken);
-
+        /// <exception cref="InAppBillingPurchaseException">If an error occures during processing</exception>
+        public Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken = null) =>
+            null;
 
         /// <summary>
         /// Manually finish a transaction
@@ -534,7 +537,6 @@ namespace Plugin.XFInAppBilling
         }
     }
 
-
     [Preserve(AllMembers = true)]
     class ProductRequestDelegate : NSObject, ISKProductsRequestDelegate, ISKRequestDelegate
     {
@@ -566,7 +568,6 @@ namespace Plugin.XFInAppBilling
             }
         }
     }
-
 
     [Preserve(AllMembers = true)]
     class PaymentObserver : SKPaymentTransactionObserver
@@ -664,16 +665,12 @@ namespace Plugin.XFInAppBilling
             {
                 Finish(transaction);
             }
-
         }
 
         // Failure, just fire with null
         public override void RestoreCompletedTransactionsFailedWithError(SKPaymentQueue queue, NSError error) =>
             TransactionsRestored?.Invoke(null);
-
     }
-
-
 
     [Preserve(AllMembers = true)]
     static class SKTransactionExtensions
@@ -775,7 +772,7 @@ namespace Plugin.XFInAppBilling
 
         public static SubscriptionPeriod ToSubscriptionPeriod(this SKProduct p)
         {
-            if (!InAppBillingImplementation.HasIntroductoryOffer)
+            if (!XFInAppBillingImplementation.HasIntroductoryOffer)
                 return SubscriptionPeriod.Unknown;
 
             if (p?.SubscriptionPeriod?.Unit == null)
@@ -793,7 +790,7 @@ namespace Plugin.XFInAppBilling
 
         public static InAppBillingProductDiscount ToProductDiscount(this SKProductDiscount pd)
         {
-            if (!InAppBillingImplementation.HasIntroductoryOffer)
+            if (!XFInAppBillingImplementation.HasIntroductoryOffer)
                 return null;
 
             if (pd == null)
@@ -825,7 +822,7 @@ namespace Plugin.XFInAppBilling
                 _ => PaymentMode.Unknown,
             };
 
-            if (InAppBillingImplementation.HasProductDiscounts)
+            if (XFInAppBillingImplementation.HasProductDiscounts)
             {
                 discount.Id = pd.Identifier;
                 discount.Type = pd.Type switch

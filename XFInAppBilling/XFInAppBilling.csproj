@@ -119,4 +119,12 @@
 	  <None Remove="Shared\Proration.shared.cs" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Remove="Shared\SubscriptionPeriod.shared.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Shared\ProductAppleExt.shared.cs" />
+	</ItemGroup>
+
 </Project>

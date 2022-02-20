@@ -96,6 +96,10 @@
         /// <summary>
         /// Sale end time
         /// </summary>
-        public System.DateTimeOffset SaleEndDate { get; set; } 
+        public System.DateTimeOffset SaleEndDate { get; set; }
+        /// <summary>
+        /// Extra information for apple platforms
+        /// </summary>
+        public ProductAppleExt AppleExtras { get; set; } = null;
     }
 }

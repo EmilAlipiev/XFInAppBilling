@@ -707,7 +707,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="purchases"></param>
         /// <returns></returns>
-        private List<PurchaseResult> GetPurchasesAsync(IList<Purchase> purchases)
+        private List<PurchaseResult> GetPurchasesAsync(IList<Purchase> purchases, List<string> doNotFinishTransactionIds = null)
         {
             var purchaseResults = new List<PurchaseResult>();
             if (purchases?.Count > 0)
