@@ -150,7 +150,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType"></param> 
         /// <returns></returns>
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, List<string> doNotFinishTransactionIds = null)
         {
             // _tcsPurchases = new TaskCompletionSource<List<PurchaseResult>>();
             List<PurchaseResult> purchases = new List<PurchaseResult>();
@@ -707,7 +707,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="purchases"></param>
         /// <returns></returns>
-        private List<PurchaseResult> GetPurchasesAsync(IList<Purchase> purchases, List<string> doNotFinishTransactionIds = null)
+        private List<PurchaseResult> GetPurchasesAsync(IList<Purchase> purchases)
         {
             var purchaseResults = new List<PurchaseResult>();
             if (purchases?.Count > 0)

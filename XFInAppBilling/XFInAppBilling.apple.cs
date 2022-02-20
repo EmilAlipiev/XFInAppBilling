@@ -159,7 +159,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="productIds">Sku or Id of the product(s)</param>
         /// <param name="itemType">Type of product offering</param>
         /// <returns></returns>
-        public async Task<IEnumerable<InAppBillingProduct>> GetProductInfoAsync(ItemType itemType, List<string> productIds)
+        public async Task<List<InAppBillingProduct>> GetProductsAsync(List<string> productIds,ItemType itemType)
         {
             Init();
             var products = await GetProductAsync(productIds);
@@ -180,7 +180,7 @@ namespace Plugin.XFInAppBilling
                     IntroductoryOffer = HasIntroductoryOffer ? p.IntroductoryPrice?.ToProductDiscount() : null,
                     Discounts = HasProductDiscounts ? p.Discounts?.Select(s => s.ToProductDiscount()).ToList() ?? null : null
                 }
-            });
+            }).ToList();
         }
 
         Task<IEnumerable<SKProduct>> GetProductAsync(List<string> productId)
