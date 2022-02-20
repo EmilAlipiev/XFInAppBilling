@@ -99,7 +99,7 @@ namespace Plugin.XFInAppBilling
         public override void PresentCodeRedemption()
         {
 #if __IOS__ && !__MACCATALYST__
-            if(HasFamilyShareable)
+            if (HasFamilyShareable)
                 SKPaymentQueue.DefaultQueue.PresentCodeRedemptionSheet();
 #endif
         }
@@ -148,7 +148,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="productIds">Sku or Id of the product(s)</param>
         /// <param name="itemType">Type of product offering</param>
         /// <returns></returns>
-        public async   Task<IEnumerable<InAppBillingProduct>> GetProductInfoAsync(ItemType itemType, List<string> productIds)
+        public async Task<IEnumerable<InAppBillingProduct>> GetProductInfoAsync(ItemType itemType, List<string> productIds)
         {
             Init();
             var products = await GetProductAsync(productIds);
@@ -193,7 +193,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType"></param>
         /// <returns></returns>
-        public async override Task<IEnumerable<PurchaseResult>> GetPurchasesAsync(ItemType itemType, List<string> doNotFinishTransactionIds = null)
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, List<string> doNotFinishTransactionIds = null)
         {
             Init();
             var purchases = await RestoreAsync(doNotFinishTransactionIds);
@@ -204,8 +204,6 @@ namespace Plugin.XFInAppBilling
                 ?.Select(p2 => p2.ToIABPurchase())
                 ?.Distinct(comparer).ToList();
         }
-
-
 
         Task<SKPaymentTransaction[]> RestoreAsync(List<string> doNotFinishTransactionIds = null)
         {
@@ -391,7 +389,7 @@ namespace Plugin.XFInAppBilling
         /// (iOS not supported) Apple store manages upgrades natively when subscriptions of the same group are purchased.
         /// </summary>
         /// <exception cref="NotImplementedException">iOS not supported</exception>
-        public override Task<PurchaseResult> UpgradePurchasedSubscriptionAsync(string newProductId, string purchaseTokenOfOriginalSubscription, SubscriptionProrationMode prorationMode = SubscriptionProrationMode.ImmediateWithTimeProration) =>
+        public Task<PurchaseResult> UpgradePurchasedSubscriptionAsync(string newProductId, string purchaseTokenOfOriginalSubscription, Proration prorationMode = Proration.ImmediateWithTimeProration) =>
             throw new NotImplementedException("iOS not supported. Apple store manages upgrades natively when subscriptions of the same group are purchased.");
 
 
@@ -479,7 +477,7 @@ namespace Plugin.XFInAppBilling
         {
             if (disposed)
             {
-                Disposing(disposing);
+                Dispose(disposing);
                 return;
             }
 
@@ -487,7 +485,7 @@ namespace Plugin.XFInAppBilling
 
             if (!disposing)
             {
-                Disposing(disposing);
+                Dispose(disposing);
                 return;
             }
 
@@ -498,8 +496,7 @@ namespace Plugin.XFInAppBilling
                 paymentObserver = null;
             }
 
-
-            Disposing(disposing);
+            Dispose(disposing);
         }
         public async Task<bool> CheckIfUserHasActiveSubscriptionAsync(string subscriptionId, ItemType itemType = ItemType.InAppPurchase)
         {
