@@ -159,28 +159,37 @@ namespace Plugin.XFInAppBilling
         /// <param name="productIds">Sku or Id of the product(s)</param>
         /// <param name="itemType">Type of product offering</param>
         /// <returns></returns>
-        public async Task<List<InAppBillingProduct>> GetProductsAsync(List<string> productIds,ItemType itemType)
+        public async Task<List<InAppBillingProduct>> GetProductsAsync(List<string> productIds, ItemType itemType)
         {
             Init();
             var products = await GetProductAsync(productIds);
-
-            return products.Select(p => new InAppBillingProduct
+            var inAppBillingProducts = new List<InAppBillingProduct>();
+            foreach (var p in products)
             {
-                LocalizedPrice = p.LocalizedPrice(),
-                MicrosPrice = (long)(p.Price.DoubleValue * 1000000d),
-                Name = p.LocalizedTitle,
-                ProductId = p.ProductIdentifier,
-                Description = p.LocalizedDescription,
-                CurrencyCode = p.PriceLocale?.CurrencyCode ?? string.Empty,
-                AppleExtras = new ProductAppleExt
+                var inappBillingProduct = new InAppBillingProduct
                 {
-                    IsFamilyShareable = HasFamilyShareable && p.IsFamilyShareable,
-                    SubscriptionGroupId = HasSubscriptionGroupId ? p.SubscriptionGroupIdentifier : null,
-                    SubscriptionPeriod = p.ToSubscriptionPeriod(),
-                    IntroductoryOffer = HasIntroductoryOffer ? p.IntroductoryPrice?.ToProductDiscount() : null,
-                    Discounts = HasProductDiscounts ? p.Discounts?.Select(s => s.ToProductDiscount()).ToList() ?? null : null
+                    LocalizedPrice = p.LocalizedPrice(),
+                    MicrosPrice = (long)(p.Price.DoubleValue * 1000000d),
+                    Name = p.LocalizedTitle,
+                    ProductId = p.ProductIdentifier,
+                    Description = p.LocalizedDescription,
+                    CurrencyCode = p.PriceLocale?.CurrencyCode ?? string.Empty,
+                    AppleExtras = new ProductAppleExt
+                    {
+                        SubscriptionGroupId = HasSubscriptionGroupId ? p.SubscriptionGroupIdentifier : null,
+                        SubscriptionPeriod = p.ToSubscriptionPeriod(),
+                        IntroductoryOffer = HasIntroductoryOffer ? p.IntroductoryPrice?.ToProductDiscount() : null,
+                        Discounts = HasProductDiscounts ? p.Discounts?.Select(s => s.ToProductDiscount()).ToList() ?? null : null
+                    }
+                };
+                if (inappBillingProduct.AppleExtras?.IntroductoryOffer?.PaymentMode == PaymentMode.FreeTrial)
+                {
+                    inappBillingProduct.FreeTrialPeriod = inappBillingProduct.AppleExtras.IntroductoryOffer.NumberOfPeriods + " " + inappBillingProduct.AppleExtras.IntroductoryOffer.SubscriptionPeriod.ToString();
                 }
-            }).ToList();
+
+                inAppBillingProducts.Add(inappBillingProduct);
+            }
+            return inAppBillingProducts;
         }
 
         Task<IEnumerable<SKProduct>> GetProductAsync(List<string> productId)
@@ -413,7 +422,7 @@ namespace Plugin.XFInAppBilling
                 return receiptUrl?.GetBase64EncodedString(NSDataBase64EncodingOptions.None);
             }
         }
- 
+
 
         /// <summary>
         /// Consume a purchase with a purchase token.
