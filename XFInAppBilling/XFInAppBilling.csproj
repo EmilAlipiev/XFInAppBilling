@@ -54,7 +54,7 @@
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="**\*.shared.cs" />
@@ -70,7 +70,7 @@
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
 		<Compile Include="**\*.uwp.cs" />
 
-		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.11" />
+		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.13" />
 		<PackageReference Include="Microsoft.Services.Store.SDK" Version="10.1705.16001" />
 	</ItemGroup>
 
