@@ -185,7 +185,7 @@ namespace Plugin.XFInAppBilling
                 };
                 if (inappBillingProduct.AppleExtras?.IntroductoryOffer?.PaymentMode == PaymentMode.FreeTrial)
                 {
-                    inappBillingProduct.FreeTrialPeriod = inappBillingProduct.AppleExtras.IntroductoryOffer.NumberOfPeriods + " " + inappBillingProduct.AppleExtras.IntroductoryOffer.SubscriptionPeriod.ToString();
+                    inappBillingProduct.FreeTrialPeriod = inappBillingProduct.AppleExtras.IntroductoryOffer.SubscriptionPeriodNumberOfUnits + " " + inappBillingProduct.AppleExtras.IntroductoryOffer.SubscriptionPeriod.ToString();
                 }
 
                 inAppBillingProducts.Add(inappBillingProduct);
@@ -815,15 +815,19 @@ namespace Plugin.XFInAppBilling
                 CurrencyCode = pd.PriceLocale?.CurrencyCode ?? string.Empty
             };
 
-            discount.SubscriptionPeriod = pd.SubscriptionPeriod.Unit switch
+            if (pd.SubscriptionPeriod != null)
             {
-                SKProductPeriodUnit.Day => SubscriptionPeriod.Day,
-                SKProductPeriodUnit.Month => SubscriptionPeriod.Month,
-                SKProductPeriodUnit.Year => SubscriptionPeriod.Year,
-                SKProductPeriodUnit.Week => SubscriptionPeriod.Week,
-                _ => SubscriptionPeriod.Unknown
-            };
 
+                discount.SubscriptionPeriod = pd.SubscriptionPeriod.Unit switch
+                {
+                    SKProductPeriodUnit.Day => SubscriptionPeriod.Day,
+                    SKProductPeriodUnit.Month => SubscriptionPeriod.Month,
+                    SKProductPeriodUnit.Year => SubscriptionPeriod.Year,
+                    SKProductPeriodUnit.Week => SubscriptionPeriod.Week,
+                    _ => SubscriptionPeriod.Unknown
+                };
+                discount.SubscriptionPeriodNumberOfUnits = (int)pd.SubscriptionPeriod.NumberOfUnits;
+            }
             discount.PaymentMode = pd.PaymentMode switch
             {
                 SKProductDiscountPaymentMode.FreeTrial => PaymentMode.FreeTrial,
