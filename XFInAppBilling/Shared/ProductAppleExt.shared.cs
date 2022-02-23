@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Plugin.XFInAppBilling
-{ 
+{
     /// <summary>
     /// Product info specific to Apple Platforms
     /// </summary>
@@ -78,6 +78,10 @@ namespace Plugin.XFInAppBilling
         /// An integer that indicates the number of periods the product discount is available.
         /// </summary>
         public SubscriptionPeriod SubscriptionPeriod { get; set; } = SubscriptionPeriod.Unknown;
+        /// <summary>
+        /// Number of unit for subscription discount period
+        /// </summary>
+        public int SubscriptionPeriodNumberOfUnits { get; set; } = 1;
     }
     [Preserve(AllMembers = true)]
     public enum ProductDiscountType
