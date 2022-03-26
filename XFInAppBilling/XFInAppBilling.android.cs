@@ -529,7 +529,11 @@ namespace Plugin.XFInAppBilling
             }
             else if (billingResult.ResponseCode == BillingResponseCode.ItemAlreadyOwned)
             {
-                purchaseResult.PurchaseState = PurchaseState.AlreadyOwned;
+                purchaseResult.PurchaseState = PurchaseState.Restored;
+            }
+            else if (billingResult.ResponseCode == BillingResponseCode.ServiceUnavailable || billingResult.ResponseCode == BillingResponseCode.ServiceDisconnected || billingResult.ResponseCode == BillingResponseCode.ServiceTimeout)
+            {
+                purchaseResult.PurchaseState = PurchaseState.ServerError;
             }
             else
             {
@@ -721,16 +725,13 @@ namespace Plugin.XFInAppBilling
                         switch (purchase.PurchaseState)
                         {
                             case Android.BillingClient.Api.PurchaseState.Pending:
-                                purchaseState = PurchaseState.Pending;
+                                purchaseState = PurchaseState.PaymentPending;
                                 break;
                             case Android.BillingClient.Api.PurchaseState.Purchased:
                                 purchaseState = PurchaseState.Purchased;
-                                break;
-                            case Android.BillingClient.Api.PurchaseState.Unspecified:
-                                purchaseState = PurchaseState.Unspecified;
-                                break;
+                                break;                  
                             default:
-                                purchaseState = PurchaseState.Unspecified;
+                                purchaseState = PurchaseState.Unknown;
                                 break;
                         }
 

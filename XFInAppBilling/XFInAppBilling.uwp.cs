@@ -356,10 +356,10 @@ namespace Plugin.XFInAppBilling
                 StorePurchaseStatus.Succeeded => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId },// Show a UI to acknowledge that the customer has purchased your subscription 
                                                                                                                                    // and unlock the features of the subscription. 
                 StorePurchaseStatus.NotPurchased => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
-                StorePurchaseStatus.ServerError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+                StorePurchaseStatus.ServerError => new PurchaseResult() { PurchaseState = PurchaseState.ServerError, Sku = productId },
                 StorePurchaseStatus.NetworkError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
                 StorePurchaseStatus.AlreadyPurchased => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId },
-                _ => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+                _ => new PurchaseResult() { PurchaseState = PurchaseState.Unknown, Sku = productId },
             };
         }
 

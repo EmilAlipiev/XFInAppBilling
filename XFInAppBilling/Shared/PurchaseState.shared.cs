@@ -11,60 +11,44 @@ namespace Plugin.XFInAppBilling
     public enum PurchaseState
     {
         /// <summary>
-        /// unknown
-        /// </summary>
-        Unspecified = 0,
-        /// <summary>
         /// successful purchase or consume
         /// </summary>
-        Purchased = 1,
-        /// <summary>
-        /// incomplete
-        /// </summary>
-        Pending = 2,
+        Purchased,
         /// <summary>
         /// not successfull
         /// </summary>
-        Failed = 3,
+        Failed,
         /// <summary>
         /// cancelled
         /// </summary>
-        Cancelled = 4,
+        Cancelled,
         /// <summary>
-        /// pending
+        /// restored,  purchase already owned by user
         /// </summary>
-        NotAknowledged = 5,
-        /// <summary>
-        /// restored
-        /// </summary>
-        Restored = 6,
-        /// <summary>
-        /// refunded
-        /// </summary>
-        Refunded = 7,
+        Restored,    
         /// <summary>
         /// in purchase progress
         /// </summary>
-        Purchasing = 8,
-        /// <summary>
-        /// trial purchase
-        /// </summary>
-        FreeTrial = 9,
+        Purchasing,
         /// <summary>
         /// pament not confirmed
         /// </summary>
-        PaymentPending = 10,
-        /// <summary>
-        /// purchase already owned by user
-        /// </summary>
-        AlreadyOwned = 11,
+        PaymentPending,
         /// <summary>
         /// used for consume only
         /// </summary>
-        InsufficentQuantity = 12,
+        InsufficentQuantity,
         /// <summary>
-        /// 
+        ///  In queue, pending external action, IOS
         /// </summary>
-        Deferred = 13
+        Deferred,
+        /// <summary>
+        /// unknown
+        /// </summary>
+        Unknown,
+        /// <summary>
+        /// Problem on the server of the Store
+        /// </summary>
+        ServerError
     }
 }

@@ -726,7 +726,7 @@ namespace Plugin.XFInAppBilling
         {
 
             if (transaction?.TransactionState == null)
-                return PurchaseState.Unspecified;
+                return PurchaseState.Unknown;
 
             switch (transaction.TransactionState)
             {
@@ -744,7 +744,7 @@ namespace Plugin.XFInAppBilling
                     break;
             }
 
-            return PurchaseState.Unspecified;
+            return PurchaseState.Unknown;
         }
     }
 
