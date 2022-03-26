@@ -46,7 +46,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="itemType">only used for Google, not used for UWP, Amazon</param>    
         /// <returns></returns>
-        Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase);
+        Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, List<string> doNotFinishTransactionIds = null);
 
         /// <summary>
         /// Checks if user has any active subscription. It mostly calls GetPurchasesAsync and filters by given subscriptionId

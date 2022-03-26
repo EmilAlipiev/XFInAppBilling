@@ -9,21 +9,33 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using UIKit;
-
 namespace Plugin.XFInAppBilling
 {
-
     /// <summary>
     /// Implementation for InAppBilling
     /// </summary>
     [Preserve(AllMembers = true)]
     public class XFInAppBillingImplementation : IXFInAppBilling, IDisposable
     {
+        /// <summary>
+        /// Connect to billing service
+        /// </summary>
+        /// <returns>If Success</returns>
+        public Task<bool> ConnectAsync() => Task.FromResult(true);
+        /// <summary>
+        /// Disconnect from the billing service
+        /// </summary>
+        /// <returns>Task to disconnect</returns>
+        public bool Disconnect() => true;
+
 #if __IOS__ || __TVOS__
-        static bool HasIntroductoryPrice => UIKit.UIDevice.CurrentDevice.CheckSystemVersion(11, 2);
+        internal static bool HasIntroductoryOffer => UIKit.UIDevice.CurrentDevice.CheckSystemVersion(11, 2);
+        internal static bool HasProductDiscounts => UIKit.UIDevice.CurrentDevice.CheckSystemVersion(12, 2);
+        internal static bool HasSubscriptionGroupId => UIKit.UIDevice.CurrentDevice.CheckSystemVersion(12, 0);
+        internal static bool HasFamilyShareable => UIKit.UIDevice.CurrentDevice.CheckSystemVersion(14, 0);
 #else
-		static bool initIntro, hasIntro;
-		static bool HasIntroductoryPrice
+		static bool initIntro, hasIntro, initDiscounts, hasDiscounts, initFamily, hasFamily, initSubGroup, hasSubGroup;
+		internal static bool HasIntroductoryOffer
         {
 			get
             {
@@ -39,13 +51,83 @@ namespace Plugin.XFInAppBilling
 
 			}
         }
+		internal static bool HasProductDiscounts
+        {
+			get
+            {
+				if (initDiscounts)
+					return hasDiscounts;
+
+				initDiscounts = true;
+
+
+				using var info = new NSProcessInfo();
+				hasDiscounts = info.IsOperatingSystemAtLeastVersion(new NSOperatingSystemVersion(10,14,4));
+				return hasDiscounts;
+
+			}
+        }
+
+        internal static bool HasSubscriptionGroupId
+        {
+			get
+            {
+				if (initSubGroup)
+					return hasSubGroup;
+
+				initSubGroup = true;
+
+
+				using var info = new NSProcessInfo();
+				hasSubGroup = info.IsOperatingSystemAtLeastVersion(new NSOperatingSystemVersion(10,14,0));
+				return hasSubGroup;
+
+			}
+        }
+
+        internal static bool HasFamilyShareable
+        {
+			get
+            {
+				if (initFamily)
+					return hasFamily;
+
+				initFamily = true;
+
+
+				using var info = new NSProcessInfo();
+				hasFamily = info.IsOperatingSystemAtLeastVersion(new NSOperatingSystemVersion(11,0,0));
+				return hasFamily;
+
+			}
+        }
 #endif
+
+
+        /// <summary>
+        /// iOS: Displays a sheet that enables users to redeem subscription offer codes that you configure in App Store Connect.
+        /// </summary>
+        public void PresentCodeRedemption()
+        {
+#if __IOS__ && !__MACCATALYST__
+            if (HasFamilyShareable)
+                SKPaymentQueue.DefaultQueue.PresentCodeRedemptionSheet();
+#endif
+        }
+
+        /// <summary>
+        /// Gets if user can make payments
+        /// </summary>
+        public bool CanMakePayments => SKPaymentQueue.CanMakePayments;
 
         /// <summary>
         /// Gets or sets a callback for out of band purchases to complete.
         /// </summary>
         public static Action<PurchaseResult> OnPurchaseComplete { get; set; } = null;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static Func<SKPaymentQueue, SKPayment, SKProduct, bool> OnShouldAddStorePayment { get; set; } = null;
 
         /// <summary>
@@ -53,24 +135,24 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         public XFInAppBillingImplementation()
         {
-            paymentObserver = new PaymentObserver(OnPurchaseComplete, OnShouldAddStorePayment);
-            SKPaymentQueue.DefaultQueue.AddTransactionObserver(paymentObserver);
-            Dispose(false);
+            Init();
         }
 
-        public IntPtr Handle => throw new NotImplementedException();
+        void Init()
+        {
+            if (paymentObserver != null)
+                return;
+
+            paymentObserver = new PaymentObserver(OnPurchaseComplete, OnShouldAddStorePayment);
+            SKPaymentQueue.DefaultQueue.AddTransactionObserver(paymentObserver);
+        }
 
         /// <summary>
-        /// Connect to billing service
+        /// Gets or sets if in testing mode. Only for UWP
         /// </summary>
-        /// <returns>If Success</returns>
-        public Task<bool> ConnectAsync() => Task.FromResult(true);
+        public bool InTestingMode { get; set; }
 
-        /// <summary>
-        /// Disconnect from the billing service
-        /// </summary>
-        /// <returns>Task to disconnect</returns>
-        public bool Disconnect() => true;
+
         /// <summary>
         /// Get product information of a specific product
         /// </summary>
@@ -79,19 +161,36 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<List<InAppBillingProduct>> GetProductsAsync(List<string> productIds, ItemType itemType)
         {
+            Init();
             var products = await GetProductAsync(productIds);
-
-            return products.Select(p => new InAppBillingProduct
+            var inAppBillingProducts = new List<InAppBillingProduct>();
+            foreach (var p in products)
             {
-                LocalizedPrice = p.LocalizedPrice(),
-                MicrosPrice = (long)(p.Price.DoubleValue * 1000000d),
-                Name = p.LocalizedTitle,
-                ProductId = p.ProductIdentifier,
-                Description = p.LocalizedDescription,
-                CurrencyCode = p.PriceLocale?.CurrencyCode ?? string.Empty,
-                LocalizedIntroductoryPrice = HasIntroductoryPrice ? (p.IntroductoryPrice?.LocalizedPrice() ?? string.Empty) : string.Empty,
-                MicrosIntroductoryPrice = HasIntroductoryPrice ? (long)((p.IntroductoryPrice?.Price?.DoubleValue ?? 0) * 1000000d) : 0
-            }).ToList();
+                var inappBillingProduct = new InAppBillingProduct
+                {
+                    LocalizedPrice = p.LocalizedPrice(),
+                    MicrosPrice = (long)(p.Price.DoubleValue * 1000000d),
+                    Name = p.LocalizedTitle,
+                    ProductId = p.ProductIdentifier,
+                    Description = p.LocalizedDescription,
+                    CurrencyCode = p.PriceLocale?.CurrencyCode ?? string.Empty,
+                    AppleExtras = new ProductAppleExt
+                    {
+                        IsFamilyShareable = HasFamilyShareable && p.IsFamilyShareable,
+                        SubscriptionGroupId = HasSubscriptionGroupId ? p.SubscriptionGroupIdentifier : null,
+                        SubscriptionPeriod = p.ToSubscriptionPeriod(),
+                        IntroductoryOffer = HasIntroductoryOffer ? p.IntroductoryPrice?.ToProductDiscount() : null,
+                        Discounts = HasProductDiscounts ? p.Discounts?.Select(s => s.ToProductDiscount()).ToList() ?? null : null
+                    }
+                };
+                if (inappBillingProduct.AppleExtras?.IntroductoryOffer?.PaymentMode == PaymentMode.FreeTrial)
+                {
+                    inappBillingProduct.FreeTrialPeriod = inappBillingProduct.AppleExtras.IntroductoryOffer.SubscriptionPeriodNumberOfUnits + " " + inappBillingProduct.AppleExtras.IntroductoryOffer.SubscriptionPeriod.ToString();
+                }
+
+                inAppBillingProducts.Add(inappBillingProduct);
+            }
+            return inAppBillingProducts;
         }
 
         Task<IEnumerable<SKProduct>> GetProductAsync(List<string> productId)
@@ -110,9 +209,15 @@ namespace Plugin.XFInAppBilling
             return productRequestDelegate.WaitForResponse();
         }
 
-        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType)
+        /// <summary>
+        /// Get app purchaes
+        /// </summary>
+        /// <param name="itemType"></param>
+        /// <returns></returns>
+        public async Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType, List<string> doNotFinishTransactionIds = null)
         {
-            var purchases = await RestoreAsync();
+            Init();
+            var purchases = await RestoreAsync(doNotFinishTransactionIds);
 
             var comparer = new InAppBillingPurchaseComparer();
             return purchases
@@ -121,7 +226,7 @@ namespace Plugin.XFInAppBilling
                 ?.Distinct(comparer).ToList();
         }
 
-        Task<SKPaymentTransaction[]> RestoreAsync()
+        Task<SKPaymentTransaction[]> RestoreAsync(List<string> doNotFinishTransactionIds = null)
         {
             var tcsTransaction = new TaskCompletionSource<SKPaymentTransaction[]>();
 
@@ -130,7 +235,7 @@ namespace Plugin.XFInAppBilling
             Action<SKPaymentTransaction[]> handler = null;
             handler = new Action<SKPaymentTransaction[]>(transactions =>
             {
-
+                paymentObserver.DoNotFinishTransactionIds = new List<string>();
                 // Unsubscribe from future events
                 paymentObserver.TransactionsRestored -= handler;
 
@@ -148,6 +253,8 @@ namespace Plugin.XFInAppBilling
                 }
             });
 
+
+            paymentObserver.DoNotFinishTransactionIds = doNotFinishTransactionIds;
             paymentObserver.TransactionsRestored += handler;
 
             foreach (var trans in SKPaymentQueue.DefaultQueue.Transactions)
@@ -178,7 +285,6 @@ namespace Plugin.XFInAppBilling
                 return FindOriginalTransaction(transaction.OriginalTransaction);
 
             return transaction;
-
         }
 
         /// <summary>
@@ -191,9 +297,11 @@ namespace Plugin.XFInAppBilling
         /// <returns></returns>
         public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType, string obfuscatedAccountId = null, string obfuscatedProfileId = null)
         {
-            var p = await PurchaseAsync(productId);
+            Init();
+            var p = await PurchaseAsync(productId, itemType);
 
             var reference = new DateTime(2001, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+
 
             var purchase = new PurchaseResult
             {
@@ -210,24 +318,7 @@ namespace Plugin.XFInAppBilling
             return purchase;
         }
 
-        /// <summary>
-        /// Get the Receipt data from Bundle AppStoreReceiptUrl
-        /// </summary>
-        public string ReceiptData
-        {
-            get
-            {
-                // Get the receipt data for (server-side) validation.
-                // See: https://developer.apple.com/library/content/releasenotes/General/ValidateAppStoreReceipt/Introduction.html#//apple_ref/doc/uid/TP40010573
-                NSData receiptUrl = null;
-                if (NSBundle.MainBundle.AppStoreReceiptUrl != null)
-                    receiptUrl = NSData.FromUrl(NSBundle.MainBundle.AppStoreReceiptUrl);
-
-                return receiptUrl?.GetBase64EncodedString(NSDataBase64EncodingOptions.None);
-            }
-        }
-
-        async Task<SKPaymentTransaction> PurchaseAsync(string sku)
+        async Task<SKPaymentTransaction> PurchaseAsync(string sku, ItemType itemType)
         {
             var tcsTransaction = new TaskCompletionSource<SKPaymentTransaction>();
 
@@ -241,6 +332,7 @@ namespace Plugin.XFInAppBilling
                 if (sku != tran.Payment.ProductIdentifier)
                     return;
 
+                paymentObserver.DoNotFinishTransactionIds = new List<string>();
                 // Unsubscribe from future events
                 paymentObserver.TransactionCompleted -= handler;
 
@@ -287,6 +379,11 @@ namespace Plugin.XFInAppBilling
 
             });
 
+            if (itemType == ItemType.InAppPurchaseConsumable)
+                paymentObserver.DoNotFinishTransactionIds = new List<string>(new[] { sku });
+            else
+                paymentObserver.DoNotFinishTransactionIds = new List<string>();
+
             paymentObserver.TransactionCompleted += handler;
 
             var products = await GetProductAsync(new List<string> { sku });
@@ -303,6 +400,32 @@ namespace Plugin.XFInAppBilling
         }
 
         /// <summary>
+        /// (iOS not supported) Apple store manages upgrades natively when subscriptions of the same group are purchased.
+        /// </summary>
+        /// <exception cref="NotImplementedException">iOS not supported</exception>
+        public Task<PurchaseResult> UpgradePurchasedSubscriptionAsync(string newProductId, string purchaseTokenOfOriginalSubscription, Proration prorationMode = Proration.ImmediateWithTimeProration) =>
+            throw new NotImplementedException("iOS not supported. Apple store manages upgrades natively when subscriptions of the same group are purchased.");
+
+
+        /// <summary>
+        /// gets receipt data from bundle
+        /// </summary>
+        public string ReceiptData
+        {
+            get
+            {
+                // Get the receipt data for (server-side) validation.
+                // See: https://developer.apple.com/library/content/releasenotes/General/ValidateAppStoreReceipt/Introduction.html#//apple_ref/doc/uid/TP40010573
+                NSData receiptUrl = null;
+                if (NSBundle.MainBundle.AppStoreReceiptUrl != null)
+                    receiptUrl = NSData.FromUrl(NSBundle.MainBundle.AppStoreReceiptUrl);
+
+                return receiptUrl?.GetBase64EncodedString(NSDataBase64EncodingOptions.None);
+            }
+        }
+
+
+        /// <summary>
         /// Consume a purchase with a purchase token.
         /// </summary>
         /// <param name="productId">Id or Sku of product</param>
@@ -312,56 +435,52 @@ namespace Plugin.XFInAppBilling
         public Task<PurchaseResult> ConsumePurchaseAsync(string productId, string purchaseToken = null) =>
             null;
 
+        /// <summary>
+        /// Manually finish a transaction
+        /// </summary>
+        /// <param name="purchase"></param>
+        /// <returns></returns>
         public Task<bool> FinishTransaction(PurchaseResult purchase) =>
             FinishTransaction(purchase?.OrderId);
 
-        public async Task<bool> FinishTransaction(string purchaseId)
+        /// <summary>
+        /// Finish a transaction manually
+        /// </summary>
+        /// <param name="purchaseToken"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<bool> FinishTransaction(string purchaseToken)
         {
-            if (string.IsNullOrWhiteSpace(purchaseId))
-                throw new ArgumentException("PurchaseId must be valid", nameof(purchaseId));
+            if (string.IsNullOrWhiteSpace(purchaseToken))
+                throw new ArgumentException("Purchase Token must be valid", nameof(purchaseToken));
 
             var purchases = await RestoreAsync();
 
             if (purchases == null)
                 return false;
 
-            var transaction = purchases.Where(p => p.TransactionIdentifier == purchaseId).FirstOrDefault();
+            var transaction = purchases.Where(p => p.TransactionIdentifier == purchaseToken).FirstOrDefault();
             if (transaction == null)
                 return false;
 
-            SKPaymentQueue.DefaultQueue.FinishTransaction(transaction);
+            try
+            {
+                SKPaymentQueue.DefaultQueue.FinishTransaction(transaction);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Unable to finish transaction: " + ex);
+                return false;
+            }
 
             return true;
         }
 
         PaymentObserver paymentObserver;
 
-        static DateTime NSDateToDateTimeUtc(NSDate date)
-        {
-            var reference = new DateTime(2001, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
+        bool disposed = false;
 
-            return reference.AddSeconds(date?.SecondsSinceReferenceDate ?? 0);
-        }
-
-        private bool disposed = false;
-
-        /// <summary>
-        /// Dispose method
-        /// </summary>
-        /// <param name="disposing"></param>
-        public void Disposing(bool disposing)
-        {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    //dispose only
-                }
-
-                disposed = true;
-            }
-        }
 
         /// <summary>
         /// Dispose
@@ -371,7 +490,7 @@ namespace Plugin.XFInAppBilling
         {
             if (disposed)
             {
-                Disposing(disposing);
+                Dispose(disposing);
                 return;
             }
 
@@ -379,7 +498,7 @@ namespace Plugin.XFInAppBilling
 
             if (!disposing)
             {
-                Disposing(disposing);
+                Dispose(disposing);
                 return;
             }
 
@@ -390,10 +509,8 @@ namespace Plugin.XFInAppBilling
                 paymentObserver = null;
             }
 
-
-            Disposing(disposing);
+            Dispose(disposing);
         }
-
         public async Task<bool> CheckIfUserHasActiveSubscriptionAsync(string subscriptionId, ItemType itemType = ItemType.InAppPurchase)
         {
             var purchases = await GetPurchasesAsync(itemType);
@@ -415,7 +532,6 @@ namespace Plugin.XFInAppBilling
         {
             throw new NotImplementedException();
         }
-
         /// <summary>
         /// Dispose of class and parent classes
         /// </summary>
@@ -430,7 +546,6 @@ namespace Plugin.XFInAppBilling
             throw new NotImplementedException();
         }
     }
-
 
     [Preserve(AllMembers = true)]
     class ProductRequestDelegate : NSObject, ISKProductsRequestDelegate, ISKRequestDelegate
@@ -470,6 +585,8 @@ namespace Plugin.XFInAppBilling
         public event Action<SKPaymentTransaction, bool> TransactionCompleted;
         public event Action<SKPaymentTransaction[]> TransactionsRestored;
 
+        public List<string> DoNotFinishTransactionIds { get; set; }
+
         readonly List<SKPaymentTransaction> restoredTransactions = new();
         readonly Action<PurchaseResult> onPurchaseSuccess;
         readonly Func<SKPaymentQueue, SKPayment, SKProduct, bool> onShouldAddStorePayment;
@@ -480,7 +597,8 @@ namespace Plugin.XFInAppBilling
             this.onShouldAddStorePayment = onShouldAddStorePayment;
         }
 
-        public override bool ShouldAddStorePayment(SKPaymentQueue queue, SKPayment payment, SKProduct product) => onShouldAddStorePayment?.Invoke(queue, payment, product) ?? false;
+        public override bool ShouldAddStorePayment(SKPaymentQueue queue, SKPayment payment, SKProduct product) =>
+            onShouldAddStorePayment?.Invoke(queue, payment, product) ?? false;
 
         public override void UpdatedTransactions(SKPaymentQueue queue, SKPaymentTransaction[] transactions)
         {
@@ -507,15 +625,34 @@ namespace Plugin.XFInAppBilling
 
                         onPurchaseSuccess?.Invoke(transaction.ToIABPurchase());
 
-                        SKPaymentQueue.DefaultQueue.FinishTransaction(transaction);
+                        Finish(transaction);
                         break;
                     case SKPaymentTransactionState.Failed:
                         TransactionCompleted?.Invoke(transaction, false);
-                        SKPaymentQueue.DefaultQueue.FinishTransaction(transaction);
+                        Finish(transaction);
                         break;
                     default:
                         break;
                 }
+            }
+        }
+
+        void Finish(SKPaymentTransaction transaction)
+        {
+
+            //checks to see if we should or shouldn't finish this.
+            var id = transaction.Payment?.ProductIdentifier ?? string.Empty;
+            var containsId = DoNotFinishTransactionIds?.Contains(id) ?? false;
+            if (containsId)
+                return;
+
+            try
+            {
+                SKPaymentQueue.DefaultQueue.FinishTransaction(transaction);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Couldn't finish transaction: " + ex);
             }
         }
 
@@ -533,14 +670,16 @@ namespace Plugin.XFInAppBilling
 
             TransactionsRestored?.Invoke(allTransactions);
 
+
             foreach (var transaction in allTransactions)
-                SKPaymentQueue.DefaultQueue.FinishTransaction(transaction);
+            {
+                Finish(transaction);
+            }
         }
 
         // Failure, just fire with null
         public override void RestoreCompletedTransactionsFailedWithError(SKPaymentQueue queue, NSError error) =>
             TransactionsRestored?.Invoke(null);
-
     }
 
     [Preserve(AllMembers = true)]
@@ -587,7 +726,7 @@ namespace Plugin.XFInAppBilling
         {
 
             if (transaction?.TransactionState == null)
-                return PurchaseState.Unspecified;
+                return PurchaseState.Unknown;
 
             switch (transaction.TransactionState)
             {
@@ -605,13 +744,16 @@ namespace Plugin.XFInAppBilling
                     break;
             }
 
-            return PurchaseState.Unspecified;
+            return PurchaseState.Unknown;
         }
     }
+
 
     [Preserve(AllMembers = true)]
     static class SKProductExtension
     {
+
+
         /// <remarks>
         /// Use Apple's sample code for formatting a SKProduct price
         /// https://developer.apple.com/library/ios/#DOCUMENTATION/StoreKit/Reference/SKProduct_Reference/Reference/Reference.html#//apple_ref/occ/instp/SKProduct/priceLocale
@@ -638,6 +780,76 @@ namespace Plugin.XFInAppBilling
             return formattedString;
         }
 
+        public static SubscriptionPeriod ToSubscriptionPeriod(this SKProduct p)
+        {
+            if (!XFInAppBillingImplementation.HasIntroductoryOffer)
+                return SubscriptionPeriod.Unknown;
+
+            if (p?.SubscriptionPeriod?.Unit == null)
+                return SubscriptionPeriod.Unknown;
+
+            return p.SubscriptionPeriod.Unit switch
+            {
+                SKProductPeriodUnit.Day => SubscriptionPeriod.Day,
+                SKProductPeriodUnit.Month => SubscriptionPeriod.Month,
+                SKProductPeriodUnit.Year => SubscriptionPeriod.Year,
+                SKProductPeriodUnit.Week => SubscriptionPeriod.Week,
+                _ => SubscriptionPeriod.Unknown,
+            };
+        }
+
+        public static InAppBillingProductDiscount ToProductDiscount(this SKProductDiscount pd)
+        {
+            if (!XFInAppBillingImplementation.HasIntroductoryOffer)
+                return null;
+
+            if (pd == null)
+                return null;
+
+
+            var discount = new InAppBillingProductDiscount
+            {
+                LocalizedPrice = pd.LocalizedPrice(),
+                Price = (pd.Price?.DoubleValue ?? 0) * 1000000d,
+                NumberOfPeriods = (int)pd.NumberOfPeriods,
+                CurrencyCode = pd.PriceLocale?.CurrencyCode ?? string.Empty
+            };
+
+            if (pd.SubscriptionPeriod != null)
+            {
+
+                discount.SubscriptionPeriod = pd.SubscriptionPeriod.Unit switch
+                {
+                    SKProductPeriodUnit.Day => SubscriptionPeriod.Day,
+                    SKProductPeriodUnit.Month => SubscriptionPeriod.Month,
+                    SKProductPeriodUnit.Year => SubscriptionPeriod.Year,
+                    SKProductPeriodUnit.Week => SubscriptionPeriod.Week,
+                    _ => SubscriptionPeriod.Unknown
+                };
+                discount.SubscriptionPeriodNumberOfUnits = (int)pd.SubscriptionPeriod.NumberOfUnits;
+            }
+            discount.PaymentMode = pd.PaymentMode switch
+            {
+                SKProductDiscountPaymentMode.FreeTrial => PaymentMode.FreeTrial,
+                SKProductDiscountPaymentMode.PayUpFront => PaymentMode.PayUpFront,
+                SKProductDiscountPaymentMode.PayAsYouGo => PaymentMode.PayAsYouGo,
+                _ => PaymentMode.Unknown,
+            };
+
+            if (XFInAppBillingImplementation.HasProductDiscounts)
+            {
+                discount.Id = pd.Identifier;
+                discount.Type = pd.Type switch
+                {
+                    SKProductDiscountType.Introductory => ProductDiscountType.Introductory,
+                    SKProductDiscountType.Subscription => ProductDiscountType.Subscription,
+                    _ => ProductDiscountType.Unknown,
+                };
+            }
+
+            return discount;
+        }
+
         public static string LocalizedPrice(this SKProductDiscount product)
         {
             if (product?.PriceLocale == null)
@@ -654,5 +866,4 @@ namespace Plugin.XFInAppBilling
             return formattedString;
         }
     }
-
 }

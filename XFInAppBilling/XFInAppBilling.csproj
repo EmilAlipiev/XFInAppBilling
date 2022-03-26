@@ -7,7 +7,7 @@
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-		<Version>4.0.8-pre3</Version>
+		<Version>4.1.1</Version>
 		<Authors>Emil Alipiev</Authors>
 		<PackageId>XFInAppBilling</PackageId>
 		<PackOnBuild>true</PackOnBuild>
@@ -23,7 +23,7 @@
 			If your project is not using AndoridX and below 4.5 please use Version 1 of this library. Starting from Version 2 XF 4.5 and above is supported. I try to apply same changes on both branches.
 		</Description>
 		<PackageReleaseNotes>
-		  AcknowledgePurchase separated from PurchaseAsync
+			Ios extended with introductory prices like free trials, dicount offers etc. purchase status changes, unused purchase status removed
 		</PackageReleaseNotes>
 		<Copyright>Copyright 2020</Copyright>
 		<RepositoryUrl>https://github.com/EmilAlipiev/XFInAppBilling</RepositoryUrl>
@@ -54,7 +54,7 @@
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="**\*.shared.cs" />
@@ -70,7 +70,7 @@
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
 		<Compile Include="**\*.uwp.cs" />
 
-		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.11" />
+		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.13" />
 		<PackageReference Include="Microsoft.Services.Store.SDK" Version="10.1705.16001" />
 	</ItemGroup>
 
@@ -115,8 +115,6 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 
-	<ItemGroup>
-	  <None Remove="Shared\Proration.shared.cs" />
-	</ItemGroup>
+	
 
 </Project>

@@ -72,7 +72,7 @@ namespace Plugin.XFInAppBilling
             throw new NotImplementedException();
         }
 
-        public Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase)
+        public Task<List<PurchaseResult>> GetPurchasesAsync(ItemType itemType = ItemType.InAppPurchase, List<string> doNotFinishTransactionIds = null)
         {
             throw new NotImplementedException();
         }
