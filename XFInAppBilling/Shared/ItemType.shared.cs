@@ -1,6 +1,5 @@
 ﻿namespace Plugin.XFInAppBilling
 {
-
     /// <summary>
     /// Product item type
     /// </summary>
@@ -14,6 +13,10 @@
         /// <summary>
         /// On going subscription
         /// </summary>
-        Subscription
+        Subscription,
+        /// <summary>
+        /// Consumable IAp
+        /// </summary>
+        InAppPurchaseConsumable
     }
 }

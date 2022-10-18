@@ -18,7 +18,14 @@ namespace Plugin.XFInAppBilling
         {
                 
         }
-        public string Sku { get; set; }    
+        /// <summary>
+        /// Sku of Purchased Item
+        /// </summary>
+        public string Sku { get; set; }
+        /// <summary>
+        /// Skus of Purchased Items. if multiple skus are purchased with 1 billing request. For subscriptions always 1
+        /// </summary>
+        public IList<string> Skus { get; set; }
         public string PurchaseToken { get; set; }
         public string OrderId { get; set; }
         public bool IsAutoRenewing { get; set; }
@@ -30,11 +37,27 @@ namespace Plugin.XFInAppBilling
         public string UserId { get; set; }
         public string ItemType { get; set; }
 
+        public string ObfuscatedAccountId { get; set; }
+
+        public string ObfuscatedProfileId { get; set; }
+
         /// <summary>
         /// Gets the current consumption state
         /// </summary>
         public ConsumptionState ConsumptionState { get; set; }
- 
+        /// <summary>
+        /// Returns the quantity of the purchased product
+        /// Android:Always returns 1 for BillingClient.SkuType.SUBS items; could be greater than 1 for BillingClient.SkuType.INAPP items.
+        /// </summary>
+        public int Quantity { get;  set; }
+        /// <summary>
+        /// Indicates whether the subscritpion renewes automatically. If true, the sub is active, else false the user has canceled.
+        /// </summary>
+        public bool AutoRenewing { get; set; }
+
+        public string OriginalJson { get; set; }
+        public string Signature { get; set; }
+
         public static bool operator ==(PurchaseResult left, PurchaseResult right) =>
             Equals(left, right);
 
@@ -43,10 +66,9 @@ namespace Plugin.XFInAppBilling
 
         public override bool Equals(object obj) =>
             (obj is PurchaseResult purchase) && Equals(purchase);
-
         public bool Equals(PurchaseResult other) =>
-            (OrderId, Sku, IsAutoRenewing, PurchaseToken, PurchaseState, DeveloperPayload) ==
-            (other.OrderId, other.Sku, other.IsAutoRenewing, other.PurchaseToken, other.PurchaseState, other.DeveloperPayload);
+                (OrderId, PurchaseDate, IsAcknowledged, Sku, AutoRenewing, PurchaseToken, PurchaseState, DeveloperPayload, ObfuscatedAccountId, ObfuscatedProfileId, Quantity, Skus, OriginalJson, Signature) ==
+                (other.OrderId, other.PurchaseDate, other.IsAcknowledged, other.Sku, other.AutoRenewing, other.PurchaseToken, other.PurchaseState, other.DeveloperPayload, other.ObfuscatedAccountId, other.ObfuscatedProfileId, other.Quantity, other.Skus, other.OriginalJson, other.Signature);
 
         public override int GetHashCode() =>
             (OrderId, Sku, IsAutoRenewing, PurchaseToken, PurchaseState, DeveloperPayload).GetHashCode();
@@ -56,7 +78,8 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <returns></returns>
         public override string ToString() =>
-            $"Sku:{Sku} | IsAutoRenewing:{IsAutoRenewing} | PurchaseState:{PurchaseState} | OrderId:{OrderId}"; 
-       
+            $"{nameof(Sku)}:{Sku}| {nameof(IsAcknowledged)}:{IsAcknowledged} | {nameof(AutoRenewing)}:{AutoRenewing} | {nameof(PurchaseState)}:{PurchaseState} | {nameof(OrderId)}:{OrderId} | {nameof(ObfuscatedAccountId)}:{ObfuscatedAccountId}  | {nameof(ObfuscatedProfileId)}:{ObfuscatedProfileId}  | {nameof(Signature)}:{Signature}  | {nameof(OriginalJson)}:{OriginalJson}  | {nameof(Quantity)}:{Quantity}";
+
+
     }
 }
