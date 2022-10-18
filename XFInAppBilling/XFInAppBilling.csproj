@@ -58,7 +58,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="**\*.shared.cs" />
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<!--<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />-->
 		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
 	</ItemGroup>
