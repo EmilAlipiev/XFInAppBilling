@@ -15,7 +15,6 @@
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
-    <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
     <TargetFrameworkVersion>v9.0</TargetFrameworkVersion>
     <AndroidEnableSGenConcurrent>true</AndroidEnableSGenConcurrent>
     <AndroidUseAapt2>true</AndroidUseAapt2>
@@ -97,7 +96,7 @@
       <Name>XFInAppBilling</Name>
     </ProjectReference>
     <ProjectReference Include="..\XFInAppBilling.Tests\XFInAppBilling.Tests.csproj">
-      <Project>{642F5819-66BA-4407-9E36-FBB08433E2FA}</Project>
+      <Project>{8FEA80A4-3A7E-49BB-91B9-1E213DFD34C4}</Project>
       <Name>XFInAppBilling.Tests</Name>
     </ProjectReference>
   </ItemGroup>
