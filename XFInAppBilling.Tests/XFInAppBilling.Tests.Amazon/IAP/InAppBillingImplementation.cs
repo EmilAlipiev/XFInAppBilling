@@ -110,7 +110,7 @@ namespace XFInAppBilling.Tests.Amazon.IAP
             {
 
                 if (await CheckIfUserHasActiveSubscriptionAsync(productId))
-                    return new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId };
+                    return new PurchaseResult() { PurchaseState = PurchaseState.Purchased, ProductId = productId };
 
                 if (context == null)
                     context = AmazonIapV2Impl.Instance;
@@ -160,7 +160,7 @@ namespace XFInAppBilling.Tests.Amazon.IAP
                 }
                 catch (Exception)
                 {
-                    return new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId };
+                    return new PurchaseResult() { PurchaseState = PurchaseState.Failed, ProductId = productId };
                 }
 
             }
@@ -182,7 +182,7 @@ namespace XFInAppBilling.Tests.Amazon.IAP
                     {
                         var purchaseHistory = new PurchaseResult
                         {
-                            Sku = purchase.Sku, PurchaseToken = purchase.ReceiptId
+                            ProductId = purchase.Sku, PurchaseToken = purchase.ReceiptId
                         };
 
                         if (purchase.PurchaseDate > 0)
@@ -321,7 +321,7 @@ namespace XFInAppBilling.Tests.Amazon.IAP
                 //string receiptId = receipts[0].ReceiptId;
                 //long cancelDate = receipts[0].CancelDate;
                 //long purchaseDate = receipts[0].PurchaseDate;
-                //string sku = receipts[0].Sku;
+                //string sku = receipts[0].ProductId;
                 //string productType = receipts[0].ProductType;
 
                 return receipts;
@@ -352,7 +352,7 @@ namespace XFInAppBilling.Tests.Amazon.IAP
                     purchaseResult.ExpirationDate = DateTimeOffset.FromUnixTimeSeconds(args.PurchaseReceipt.CancelDate).DateTime;
                 if (args.PurchaseReceipt.PurchaseDate > 0)
                     purchaseResult.PurchaseDate = DateTimeOffset.FromUnixTimeSeconds(args.PurchaseReceipt.PurchaseDate).DateTime;
-                purchaseResult.Sku = args.PurchaseReceipt.Sku;
+                purchaseResult.ProductId = args.PurchaseReceipt.Sku;
                 purchaseResult.ItemType = args.PurchaseReceipt.ProductType;
                 if (args.Status == "Cancelled")
                     purchaseResult.PurchaseState = PurchaseState.Cancelled;
@@ -395,7 +395,7 @@ namespace XFInAppBilling.Tests.Amazon.IAP
 
                 //// for each item in the productDataMap you can get the following values for a given SKU
                 //// (replace "sku" with the actual SKU)
-                //string sku = Products["sku"].Sku;
+                //string sku = Products["sku"].ProductId;
                 //string productType = Products["sku"].ProductType;
                 //string price = Products["sku"].Price;
                 //string title = Products["sku"].Title;

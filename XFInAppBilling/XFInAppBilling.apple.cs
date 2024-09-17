@@ -156,7 +156,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// Get product information of a specific product
         /// </summary>
-        /// <param name="productIds">Sku or Id of the product(s)</param>
+        /// <param name="productIds">ProductId or Id of the product(s)</param>
         /// <param name="itemType">Type of product offering</param>
         /// <returns></returns>
         public async Task<List<InAppBillingProduct>> GetProductsAsync(List<string> productIds, ItemType itemType)
@@ -290,7 +290,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// Purchase a specific product or subscription
         /// </summary>
-        /// <param name="productId">Sku or ID of product</param>
+        /// <param name="productId">ProductId or ID of product</param>
         /// <param name="itemType">Type of product being requested</param>
         /// <param name="obfuscatedAccountId">Specifies an optional obfuscated string that is uniquely associated with the user's account in your app.</param>
         /// <param name="obfuscatedProfileId">Specifies an optional obfuscated string that is uniquely associated with the user's profile in your app.</param>
@@ -307,8 +307,8 @@ namespace Plugin.XFInAppBilling
             {
                 PurchaseDate = reference.AddSeconds(p.TransactionDate.SecondsSinceReferenceDate),
                 OrderId = p.TransactionIdentifier,
-                Sku = p.Payment?.ProductIdentifier ?? string.Empty,
-                Skus = new string[] { p.Payment?.ProductIdentifier ?? string.Empty },
+                ProductId = p.Payment?.ProductIdentifier ?? string.Empty,
+                Products = new string[] { p.Payment?.ProductIdentifier ?? string.Empty },
                 PurchaseState = p.GetPurchaseState(),
 #if __IOS__ || __TVOS__
                 PurchaseToken = p.TransactionReceipt?.GetBase64EncodedString(NSDataBase64EncodingOptions.None) ?? string.Empty
@@ -428,7 +428,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// Consume a purchase with a purchase token.
         /// </summary>
-        /// <param name="productId">Id or Sku of product</param>
+        /// <param name="productId">Id or ProductId of product</param>
         /// <param name="purchaseToken">Original Purchase Token</param>
         /// <returns>If consumed successful</returns>
         /// <exception cref="InAppBillingPurchaseException">If an error occures during processing</exception>
@@ -516,7 +516,7 @@ namespace Plugin.XFInAppBilling
             var purchases = await GetPurchasesAsync(itemType);
             if (purchases?.Count > 0)
             {
-                var found = purchases.Any(p => p.Sku == subscriptionId && p.PurchaseState == PurchaseState.Purchased);
+                var found = purchases.Any(p => p.ProductId == subscriptionId && p.PurchaseState == PurchaseState.Purchased);
                 return found;
             }
 
@@ -708,8 +708,8 @@ namespace Plugin.XFInAppBilling
             {
                 PurchaseDate = NSDateToDateTimeUtc(transaction.TransactionDate),
                 OrderId = p.TransactionIdentifier,
-                Sku = p.Payment?.ProductIdentifier ?? string.Empty,
-                Skus = new string[] { p.Payment?.ProductIdentifier ?? string.Empty },
+                ProductId = p.Payment?.ProductIdentifier ?? string.Empty,
+                Products = new string[] { p.Payment?.ProductIdentifier ?? string.Empty },
                 PurchaseState = p.GetPurchaseState(),
                 PurchaseToken = finalToken
             };

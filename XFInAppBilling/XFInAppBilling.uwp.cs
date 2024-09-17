@@ -168,7 +168,7 @@ namespace Plugin.XFInAppBilling
                 {
                     StoreLicense license = addOnLicense.Value;
                     var purchaseHistory = new PurchaseResult();
-                    purchaseHistory.Sku = license.InAppOfferToken; //UWP SkuStoreId is different than Product ID, InAppOfferToken is the product ID
+                    purchaseHistory.ProductId = license.InAppOfferToken; //UWP SkuStoreId is different than Product ID, InAppOfferToken is the product ID
                     purchaseHistory.PurchaseToken = license.SkuStoreId;
 
                     purchaseHistory.ExpirationDate = license.ExpirationDate;
@@ -221,7 +221,7 @@ namespace Plugin.XFInAppBilling
 
                     var purchaseHistory = new PurchaseResult();
 
-                    purchaseHistory.Sku = product.InAppOfferToken;
+                    purchaseHistory.ProductId = product.InAppOfferToken;
                     purchaseHistory.PurchaseToken = null;
 
                     purchaseHistory.DeveloperPayload = product.Skus?[0].CustomDeveloperData;
@@ -264,18 +264,18 @@ namespace Plugin.XFInAppBilling
             if (userOwnsSubscription)
             {
                 // Unlock all the subscription add-on features here.
-                return new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = subscriptionStoreId };
+                return new PurchaseResult() { PurchaseState = PurchaseState.Purchased, ProductId = subscriptionStoreId };
             }
 
             // Get the StoreProduct that represents the subscription add-on.
             await GetSubscriptionProductAsync(subscriptionStoreId);
             if (storeProduct == null)
             {
-                return new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = subscriptionStoreId };
+                return new PurchaseResult() { PurchaseState = PurchaseState.Failed, ProductId = subscriptionStoreId };
             }
 
             // Check if the first SKU is a trial and notify the customer that a trial is available.
-            // If a trial is available, the Skus array will always have 2 purchasable SKUs and the
+            // If a trial is available, the Products array will always have 2 purchasable SKUs and the
             // first one is the trial. Otherwise, this array will only have one SKU.
             StoreSku sku = storeProduct.Skus[0];
             //if (sku.SubscriptionInfo.HasTrialPeriod)
@@ -300,7 +300,7 @@ namespace Plugin.XFInAppBilling
             var Products = new List<InAppBillingProduct>();
             // Load the sellable add-ons for this app and check if the trial is still 
             // available for this customer. If they previously acquired a trial they won't 
-            // be able to get a trial again, and the StoreProduct.Skus property will 
+            // be able to get a trial again, and the StoreProduct.Products property will 
             // only contain one SKU.
             StoreProductQueryResult result =
                 await context.GetAssociatedStoreProductsAsync(new string[] { "Durable" });
@@ -353,13 +353,13 @@ namespace Plugin.XFInAppBilling
 
             return result.Status switch
             {
-                StorePurchaseStatus.Succeeded => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId },// Show a UI to acknowledge that the customer has purchased your subscription 
+                StorePurchaseStatus.Succeeded => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, ProductId = productId },// Show a UI to acknowledge that the customer has purchased your subscription 
                                                                                                                                    // and unlock the features of the subscription. 
-                StorePurchaseStatus.NotPurchased => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
-                StorePurchaseStatus.ServerError => new PurchaseResult() { PurchaseState = PurchaseState.ServerError, Sku = productId },
-                StorePurchaseStatus.NetworkError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
-                StorePurchaseStatus.AlreadyPurchased => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId },
-                _ => new PurchaseResult() { PurchaseState = PurchaseState.Unknown, Sku = productId },
+                StorePurchaseStatus.NotPurchased => new PurchaseResult() { PurchaseState = PurchaseState.Failed, ProductId = productId },
+                StorePurchaseStatus.ServerError => new PurchaseResult() { PurchaseState = PurchaseState.ServerError, ProductId = productId },
+                StorePurchaseStatus.NetworkError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, ProductId = productId },
+                StorePurchaseStatus.AlreadyPurchased => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, ProductId = productId },
+                _ => new PurchaseResult() { PurchaseState = PurchaseState.Unknown, ProductId = productId },
             };
         }
 
@@ -405,11 +405,11 @@ namespace Plugin.XFInAppBilling
 
             return result.Status switch
             {
-                StoreConsumableStatus.Succeeded => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, Sku = productId },// Show a UI to acknowledge that the customer has purchased your subscription                                                                                                                   // and unlock the features of the subscription. 
-                StoreConsumableStatus.InsufficentQuantity => new PurchaseResult() { PurchaseState = PurchaseState.InsufficentQuantity, Sku = productId },
-                StoreConsumableStatus.ServerError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
-                StoreConsumableStatus.NetworkError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
-                _ => new PurchaseResult() { PurchaseState = PurchaseState.Failed, Sku = productId },
+                StoreConsumableStatus.Succeeded => new PurchaseResult() { PurchaseState = PurchaseState.Purchased, ProductId = productId },// Show a UI to acknowledge that the customer has purchased your subscription                                                                                                                   // and unlock the features of the subscription. 
+                StoreConsumableStatus.InsufficentQuantity => new PurchaseResult() { PurchaseState = PurchaseState.InsufficentQuantity, ProductId = productId },
+                StoreConsumableStatus.ServerError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, ProductId = productId },
+                StoreConsumableStatus.NetworkError => new PurchaseResult() { PurchaseState = PurchaseState.Failed, ProductId = productId },
+                _ => new PurchaseResult() { PurchaseState = PurchaseState.Failed, ProductId = productId },
             };
         }
 

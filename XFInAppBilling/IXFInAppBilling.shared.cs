@@ -85,7 +85,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// Consume a purchase with a purchase token.
         /// </summary>
-        /// <param name="productId">Id or Sku of product</param>
+        /// <param name="productId">Id or ProductId of product</param>
         /// <param name="purchaseToken">Original Purchase Token- optional if provided productid is ignored</param>
         /// <returns>If consumed successful</returns>
         /// <exception cref="InAppBillingPurchaseException">If an error occures during processing</exception>

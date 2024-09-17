@@ -19,13 +19,13 @@ namespace Plugin.XFInAppBilling
                 
         }
         /// <summary>
-        /// Sku of Purchased Item
+        /// ProductId of Purchased Item
         /// </summary>
-        public string Sku { get; set; }
+        public string ProductId { get; set; }
         /// <summary>
-        /// Skus of Purchased Items. if multiple skus are purchased with 1 billing request. For subscriptions always 1
+        /// Products of Purchased Items. if multiple skus are purchased with 1 billing request. For subscriptions always 1
         /// </summary>
-        public IList<string> Skus { get; set; }
+        public IList<string> Products { get; set; }
         public string PurchaseToken { get; set; }
         public string OrderId { get; set; }
         public bool IsAutoRenewing { get; set; }
@@ -67,18 +67,18 @@ namespace Plugin.XFInAppBilling
         public override bool Equals(object obj) =>
             (obj is PurchaseResult purchase) && Equals(purchase);
         public bool Equals(PurchaseResult other) =>
-                (OrderId, PurchaseDate, IsAcknowledged, Sku, AutoRenewing, PurchaseToken, PurchaseState, DeveloperPayload, ObfuscatedAccountId, ObfuscatedProfileId, Quantity, Skus, OriginalJson, Signature) ==
-                (other.OrderId, other.PurchaseDate, other.IsAcknowledged, other.Sku, other.AutoRenewing, other.PurchaseToken, other.PurchaseState, other.DeveloperPayload, other.ObfuscatedAccountId, other.ObfuscatedProfileId, other.Quantity, other.Skus, other.OriginalJson, other.Signature);
+                (OrderId, PurchaseDate, IsAcknowledged, ProductId, AutoRenewing, PurchaseToken, PurchaseState, DeveloperPayload, ObfuscatedAccountId, ObfuscatedProfileId, Quantity, Products, OriginalJson, Signature) ==
+                (other.OrderId, other.PurchaseDate, other.IsAcknowledged, other.ProductId, other.AutoRenewing, other.PurchaseToken, other.PurchaseState, other.DeveloperPayload, other.ObfuscatedAccountId, other.ObfuscatedProfileId, other.Quantity, other.Products, other.OriginalJson, other.Signature);
 
         public override int GetHashCode() =>
-            (OrderId, Sku, IsAutoRenewing, PurchaseToken, PurchaseState, DeveloperPayload).GetHashCode();
+            (OrderId, ProductId, IsAutoRenewing, PurchaseToken, PurchaseState, DeveloperPayload).GetHashCode();
 
         /// <summary>
         /// Prints out product
         /// </summary>
         /// <returns></returns>
         public override string ToString() =>
-            $"{nameof(Sku)}:{Sku}| {nameof(IsAcknowledged)}:{IsAcknowledged} | {nameof(AutoRenewing)}:{AutoRenewing} | {nameof(PurchaseState)}:{PurchaseState} | {nameof(OrderId)}:{OrderId} | {nameof(ObfuscatedAccountId)}:{ObfuscatedAccountId}  | {nameof(ObfuscatedProfileId)}:{ObfuscatedProfileId}  | {nameof(Signature)}:{Signature}  | {nameof(OriginalJson)}:{OriginalJson}  | {nameof(Quantity)}:{Quantity}";
+            $"{nameof(ProductId)}:{ProductId}| {nameof(IsAcknowledged)}:{IsAcknowledged} | {nameof(AutoRenewing)}:{AutoRenewing} | {nameof(PurchaseState)}:{PurchaseState} | {nameof(OrderId)}:{OrderId} | {nameof(ObfuscatedAccountId)}:{ObfuscatedAccountId}  | {nameof(ObfuscatedProfileId)}:{ObfuscatedProfileId}  | {nameof(Signature)}:{Signature}  | {nameof(OriginalJson)}:{OriginalJson}  | {nameof(Quantity)}:{Quantity}";
 
 
     }
