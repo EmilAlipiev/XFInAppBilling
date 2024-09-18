@@ -68,7 +68,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// The payment mode for this product discount.
         /// </summary>
-        public PaymentMode PaymentMode { get; set; } = PaymentMode.Unknown;
+        public PaymentMode PaymentMode { get; set; } = Plugin.XFInAppBilling.PaymentMode.Unknown;
 
         /// <summary>
         /// An integer that indicates the number of periods the product discount is available.
@@ -77,7 +77,7 @@ namespace Plugin.XFInAppBilling
         /// <summary>
         /// An integer that indicates the number of periods the product discount is available.
         /// </summary>
-        public SubscriptionPeriod SubscriptionPeriod { get; set; } = SubscriptionPeriod.Unknown;
+        public SubscriptionPeriod SubscriptionPeriod { get; set; } = Plugin.XFInAppBilling.SubscriptionPeriod.Unknown;
         /// <summary>
         /// Number of unit for subscription discount period
         /// </summary>

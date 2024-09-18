@@ -101,5 +101,10 @@
         /// Extra information for apple platforms
         /// </summary>
         public ProductAppleExt AppleExtras { get; set; } = null;
+
+        /// <summary>
+        /// Extra information for Android platforms
+        /// </summary>
+        public ProductAndroidEx AndroidExtras { get; set; } = null;
     }
 }

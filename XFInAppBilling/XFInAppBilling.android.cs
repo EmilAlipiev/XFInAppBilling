@@ -395,7 +395,7 @@ namespace Plugin.XFInAppBilling
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        private async Task<PurchaseResult> DoPurchaseAsync(SkuDetails product, string obfuscatedAccountId, string obfuscatedProfileId)
+        private async Task<PurchaseResult> DoPurchaseAsync(ProductDetails product, string obfuscatedAccountId, string obfuscatedProfileId)
         {
             if (BillingClient == null || !BillingClient.IsReady)
             {
@@ -583,7 +583,7 @@ namespace Plugin.XFInAppBilling
             if (productDetailsResult == null)
                 throw new InAppBillingPurchaseException(PurchaseError.GeneralError, "productDetailsResult not found");
 
-            InAppBillingProducts = new List<InAppBillingProduct>();
+            InAppBillingProducts = [];
             if (productDetailsResult.Result.ResponseCode == BillingResponseCode.Ok)
             {
                 if (productDetailsResult.ProductDetails?.Count > 0)
@@ -591,29 +591,42 @@ namespace Plugin.XFInAppBilling
                     foreach (var product in productDetailsResult.ProductDetails)
                     {
                         var oneTime = product.GetOneTimePurchaseOfferDetails();
+                        var subs = product.GetSubscriptionOfferDetails()?.Select(s => new SubscriptionOfferDetail
+                        {
+                            BasePlanId = s.BasePlanId,
+                            OfferId = s.OfferId,
+                            OfferTags = s.OfferTags?.ToList(),
+                            OfferToken = s.OfferToken,
+                            PricingPhases = s?.PricingPhases?.PricingPhaseList?.Select(p =>
+                            new PricingPhase
+                            {
+                                BillingCycleCount = p.BillingCycleCount,
+                                BillingPeriod = p.BillingPeriod,
+                                FormattedPrice = p.FormattedPrice,
+                                PriceAmountMicros = p.PriceAmountMicros,
+                                PriceCurrencyCode = p.PriceCurrencyCode,
+                                RecurrenceMode = p.RecurrenceMode
+                            }).ToList()
+                        }).ToList();
+
+                        var firstSub = subs?.FirstOrDefault()?.PricingPhases?.Where(p => p.PriceAmountMicros != 0)?.FirstOrDefault();
+
                         InAppBillingProducts.Add(new InAppBillingProduct
                         {
-                            Description = product.Description,
-                            LocalizedPrice = product.
-                            LocalizedIntroductoryPrice = product.IntroductoryPrice,
-                            CurrencyCode = product.PriceCurrencyCode,
-                            MicrosIntroductoryPrice = product.IntroductoryPriceAmountMicros,
-                            MicrosPrice = product.PriceAmountMicros,
-                            ProductId = product.Sku,
                             Name = product.Title,
-                            Type = product.Type,
-                            IconUrl = product.IconUrl,
-                            IntroductoryPrice = product.IntroductoryPrice,
-                            IntroductoryPriceCycles = product.IntroductoryPriceCycles,
-                            IntroductoryPricePeriod = product.IntroductoryPricePeriod,
-                            SubscriptionPeriod = product.SubscriptionPeriod,
-                            FreeTrialPeriod = product.FreeTrialPeriod,
-                            OriginalPrice = product.OriginalPrice,
-                            OriginalPriceAmountMicros = product.OriginalPriceAmountMicros
+                            Description = product.Description,
+                            CurrencyCode = oneTime?.PriceCurrencyCode ?? firstSub?.PriceCurrencyCode,
+                            LocalizedPrice = oneTime?.FormattedPrice ?? firstSub?.FormattedPrice,
+                            ProductId = product.ProductId,
+                            MicrosPrice = oneTime?.PriceAmountMicros ?? firstSub?.PriceAmountMicros ?? 0,
+                            AndroidExtras = new ProductAndroidEx()
+                            {
+                                SubscriptionOfferDetails = subs
+                            }
                         });
                     }
 
-                    ProductToPurchase = productDetailsResult.SkuDetails[0];
+                    ProductToPurchase = productDetailsResult.ProductDetails[0];
                 }
             }
 
@@ -626,47 +639,8 @@ namespace Plugin.XFInAppBilling
             {
                 return InAppBillingProducts;
             }
-
-
         }
-
-        private static InAppBillingProduct ToIAPProduct(this ProductDetails product)
-        {
-            var oneTime = product.GetOneTimePurchaseOfferDetails();
-            var subs = product.GetSubscriptionOfferDetails()?.Select(s => new SubscriptionOfferDetail
-            {
-                BasePlanId = s.BasePlanId,
-                OfferId = s.OfferId,
-                OfferTags = s.OfferTags?.ToList(),
-                OfferToken = s.OfferToken,
-                PricingPhases = s?.PricingPhases?.PricingPhaseList?.Select(p =>
-                new PricingPhase
-                {
-                    BillingCycleCount = p.BillingCycleCount,
-                    BillingPeriod = p.BillingPeriod,
-                    FormattedPrice = p.FormattedPrice,
-                    PriceAmountMicros = p.PriceAmountMicros,
-                    PriceCurrencyCode = p.PriceCurrencyCode,
-                    RecurrenceMode = p.RecurrenceMode
-                }).ToList()
-            }).ToList();
-
-            var firstSub = subs?.FirstOrDefault()?.PricingPhases?.Where(p => p.PriceAmountMicros != 0)?.FirstOrDefault();
-
-            return new InAppBillingProduct
-            {
-                Name = product.Title,
-                Description = product.Description,
-                CurrencyCode = oneTime?.PriceCurrencyCode ?? firstSub?.PriceCurrencyCode,
-                LocalizedPrice = oneTime?.FormattedPrice ?? firstSub?.FormattedPrice,
-                ProductId = product.ProductId,
-                MicrosPrice = oneTime?.PriceAmountMicros ?? firstSub?.PriceAmountMicros ?? 0,
-                AndroidExtras = new InAppBillingProductAndroidExtras
-                {
-                    SubscriptionOfferDetails = subs
-                }
-            };
-        }
+     
 
         /// <summary>
         /// Disconnect Handler

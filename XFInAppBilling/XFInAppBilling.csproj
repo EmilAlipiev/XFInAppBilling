@@ -103,4 +103,10 @@
 	<PropertyGroup>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Shared\ProductAndroidExt.shared.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="Shared\InAppBillingProductDiscount.shared.cs" />
+	</ItemGroup>
 </Project>
