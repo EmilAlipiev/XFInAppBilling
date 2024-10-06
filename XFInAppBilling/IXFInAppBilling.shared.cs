@@ -31,8 +31,9 @@ namespace Plugin.XFInAppBilling
         /// <param name="itemType">only used for Google, not used for UWP, Amazon, Ios</param>
         /// <param name="obfuscatedAccountId">only used for Google, not used for UWP, Amazon, Ios</param>
         /// <param name="obfuscatedProfileId">only used for Google, not used for UWP, Amazon,Ios</param>
+        /// <param name="subOfferToken"></param>
         /// <returns></returns>
-        Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string obfuscatedAccountId = null, string obfuscatedProfileId = null);
+        Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType = ItemType.InAppPurchase, string? obfuscatedAccountId = null, string? obfuscatedProfileId = null, string? subOfferToken = null);
 
         /// <summary>
         ///  Acknowledge Purchase

@@ -46,6 +46,11 @@ namespace Plugin.XFInAppBilling
         /// An object containing the subscription period duration information.
         /// </summary>
         public SubscriptionPeriod SubscriptionPeriod { get; set; } = new();
+
+        /// <summary>
+        /// Number of unit for subscription discount period
+        /// </summary>
+        public int SubscriptionPeriodNumberOfUnits { get; set; } = 1;
     }
 
     /// <summary>

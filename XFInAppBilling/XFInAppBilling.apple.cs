@@ -295,7 +295,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="obfuscatedAccountId">Specifies an optional obfuscated string that is uniquely associated with the user's account in your app.</param>
         /// <param name="obfuscatedProfileId">Specifies an optional obfuscated string that is uniquely associated with the user's profile in your app.</param>
         /// <returns></returns>
-        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType, string obfuscatedAccountId = null, string obfuscatedProfileId = null)
+        public async Task<PurchaseResult> PurchaseAsync(string productId, ItemType itemType, string? obfuscatedAccountId = null, string? obfuscatedProfileId = null,  string? subOfferToken = null)
         {
             Init();
             var p = await PurchaseAsync(productId, itemType);
@@ -780,22 +780,28 @@ namespace Plugin.XFInAppBilling
             return formattedString;
         }
 
-        public static SubscriptionPeriod ToSubscriptionPeriod(this SKProduct p)
+        public static SubscriptionPeriod? ToSubscriptionPeriod(this SKProduct p)
         {
             if (!XFInAppBillingImplementation.HasIntroductoryOffer)
-                return SubscriptionPeriod.Unknown;
+                return null;
 
             if (p?.SubscriptionPeriod?.Unit == null)
-                return SubscriptionPeriod.Unknown;
+                return null;
 
-            return p.SubscriptionPeriod.Unit switch
+            var subPeriod = new SubscriptionPeriod
             {
-                SKProductPeriodUnit.Day => SubscriptionPeriod.Day,
-                SKProductPeriodUnit.Month => SubscriptionPeriod.Month,
-                SKProductPeriodUnit.Year => SubscriptionPeriod.Year,
-                SKProductPeriodUnit.Week => SubscriptionPeriod.Week,
-                _ => SubscriptionPeriod.Unknown,
+                Unit = p.SubscriptionPeriod.Unit switch
+                {
+                    SKProductPeriodUnit.Day => SubscriptionPeriodUnit.Day,
+                    SKProductPeriodUnit.Month => SubscriptionPeriodUnit.Month,
+                    SKProductPeriodUnit.Year => SubscriptionPeriodUnit.Year,
+                    SKProductPeriodUnit.Week => SubscriptionPeriodUnit.Week,
+                    _ => SubscriptionPeriodUnit.Unknown,
+                },
+                NumberOfUnits = (int)p.SubscriptionPeriod.NumberOfUnits
             };
+
+            return subPeriod;
         }
 
         public static InAppBillingProductDiscount ToProductDiscount(this SKProductDiscount pd)
@@ -816,15 +822,14 @@ namespace Plugin.XFInAppBilling
             };
 
             if (pd.SubscriptionPeriod != null)
-            {
-
-                discount.SubscriptionPeriod = pd.SubscriptionPeriod.Unit switch
+            {              
+                discount.SubscriptionPeriod.Unit = pd.SubscriptionPeriod.Unit switch
                 {
-                    SKProductPeriodUnit.Day => SubscriptionPeriod.Day,
-                    SKProductPeriodUnit.Month => SubscriptionPeriod.Month,
-                    SKProductPeriodUnit.Year => SubscriptionPeriod.Year,
-                    SKProductPeriodUnit.Week => SubscriptionPeriod.Week,
-                    _ => SubscriptionPeriod.Unknown
+                    SKProductPeriodUnit.Day => SubscriptionPeriodUnit.Day,
+                    SKProductPeriodUnit.Month => SubscriptionPeriodUnit.Month,
+                    SKProductPeriodUnit.Year => SubscriptionPeriodUnit.Year,
+                    SKProductPeriodUnit.Week => SubscriptionPeriodUnit.Week,
+                    _ => SubscriptionPeriodUnit.Unknown,
                 };
                 discount.SubscriptionPeriodNumberOfUnits = (int)pd.SubscriptionPeriod.NumberOfUnits;
             }

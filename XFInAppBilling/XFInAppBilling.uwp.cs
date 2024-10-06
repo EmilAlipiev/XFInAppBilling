@@ -130,7 +130,7 @@ namespace Plugin.XFInAppBilling
         /// <param name="obfuscatedAccountId">not used for UWP</param>
         /// <param name="obfuscatedProfileId">not used for UWP</param>
         /// <returns></returns>
-        public Task<PurchaseResult> PurchaseAsync(string subscriptionStoreId, ItemType itemType = ItemType.InAppPurchase, string obfuscatedAccountId = null, string obfuscatedProfileId = null)
+        public Task<PurchaseResult> PurchaseAsync(string subscriptionStoreId, ItemType itemType = ItemType.InAppPurchase, string? obfuscatedAccountId = null, string? obfuscatedProfileId = null, string? subOfferToken = null)
         {
             return SetupSubscriptionInfoAsync(subscriptionStoreId);
         }
