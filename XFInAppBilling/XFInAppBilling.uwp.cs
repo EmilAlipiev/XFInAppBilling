@@ -167,11 +167,13 @@ namespace Plugin.XFInAppBilling
                 foreach (var addOnLicense in appLicense.AddOnLicenses)
                 {
                     StoreLicense license = addOnLicense.Value;
-                    var purchaseHistory = new PurchaseResult();
-                    purchaseHistory.ProductId = license.InAppOfferToken; //UWP SkuStoreId is different than Product ID, InAppOfferToken is the product ID
-                    purchaseHistory.PurchaseToken = license.SkuStoreId;
+                    var purchaseHistory = new PurchaseResult
+                    {
+                        ProductId = license.InAppOfferToken, //UWP SkuStoreId is different than Product ID, InAppOfferToken is the product ID
+                        PurchaseToken = license.SkuStoreId,
 
-                    purchaseHistory.ExpirationDate = license.ExpirationDate;
+                        ExpirationDate = license.ExpirationDate
+                    };
                     if (!license.IsActive)
                         purchaseHistory.PurchaseState = PurchaseState.Cancelled;
                     else

@@ -22,11 +22,7 @@ namespace Plugin.XFInAppBilling
             get
             {
                 IXFInAppBilling ret = implementation.Value;
-                if (ret == null)
-                {
-                    throw NotImplementedInReferenceAssembly();
-                }
-                return ret;
+                return ret == null ? throw NotImplementedInReferenceAssembly() : ret;
             }
         }
 
